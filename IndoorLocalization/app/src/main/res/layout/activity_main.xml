@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/blue04"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <TextView
+        android:id="@+id/main_set_destination_tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="80dp"
+        android:paddingBottom="10dp"
+        android:text="환영합니다!"
+        android:textColor="@color/white"
+        android:textAlignment="center"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="16dp"
+        android:background="@drawable/style_corner20_white"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/main_set_destination_tv"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_marginTop="30dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="20dp">
+
+        <TextView
+            android:id="@+id/home_now_location_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재 위치 : AI공학관 4층 414호"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"/>
+        <TextView
+            android:id="@+id/home_enter_destination_text_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="목적지를 입력해주세요"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/home_now_location_tv"/>
+        <Spinner
+            android:id="@+id/home_destination_floor_sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/home_enter_destination_text_tv"/>
+        <Spinner
+            android:id="@+id/home_destination_room_sp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/home_destination_floor_sp"
+            app:layout_constraintTop_toBottomOf="@+id/home_enter_destination_text_tv"/>
+        
+        <Button
+            android:id="@+id/home_start_btn_tv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="출발하기"
+            app:layout_constraintBottom_toBottomOf="parent"/>
+
+
+
+
+        <!-- 구현 가능하면 추가하기 -->
+
+        <TextView
+            android:id="@+id/home_estimated_time_text_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="예상 소요 시간 : mm분"
+            app:layout_constraintTop_toBottomOf="@+id/home_destination_floor_sp"
+            app:layout_constraintStart_toStartOf="parent"/>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>
