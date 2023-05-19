@@ -3,8 +3,11 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_back.xml" value="0.1565" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_upward.xml" value="0.1565" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_nav.xml" value="0.1565" />
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/layout/activity_main.xml" value="0.146875" />
-        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/layout/activity_navigation.xml" value="0.1" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/layout/activity_navigation.xml" value="0.16666666666666666" />
       </map>
     </option>
   </component>
