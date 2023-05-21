@@ -29,7 +29,7 @@
             app:srcCompat="@color/material_dynamic_neutral60" />
 
         <TextView
-            android:id="@+id/textView"
+            android:id="@+id/address"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="출발지 : AI공학관 304호\n목적지 : AI공학관 412호"
@@ -42,7 +42,7 @@
             app:textAllCaps="false" />
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/direction"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="250dp"
@@ -52,7 +52,7 @@
             app:srcCompat="@drawable/ic_nav" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/remained_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
