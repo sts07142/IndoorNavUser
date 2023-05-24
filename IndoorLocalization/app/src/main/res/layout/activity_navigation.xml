@@ -24,7 +24,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/navigation_textview_destination"
-            app:srcCompat="@color/material_dynamic_neutral60" />
+            android:background="#8F9193" />
 
         <TextView
             android:id="@+id/navigation_textview_destination"
@@ -57,7 +57,7 @@
             android:layout_marginBottom="50dp"
             android:textSize="20sp"
             android:textColor="@color/white"
-            android:text="남은 거리 : 0 M"
+            android:text="다음 안내 : 0 M\n남은 거리 : 0 M"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
