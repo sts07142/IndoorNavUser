@@ -118,19 +118,24 @@ public class NavigationActivity extends AppCompatActivity {
                             case -2:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "5층 -> 4층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
+                                direction.setImageResource(R.drawable.ic_arrow_upward);
                                 break;
                             case -1:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
+                                direction.setImageResource(R.drawable.ic_arrow_upward);
                                 break;
                             case 0:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
+                                direction.setImageResource(R.drawable.ic_arrow_upward);
                                 break;
                             case 1:
                                 //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
+                                direction.setImageResource(R.drawable.ic_arrow_turn_left);
                                 break;
                             case 2:
                                 //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
+                                direction.setImageResource(R.drawable.ic_arrow_turn_right);
                                 break;
                         }
                     }
