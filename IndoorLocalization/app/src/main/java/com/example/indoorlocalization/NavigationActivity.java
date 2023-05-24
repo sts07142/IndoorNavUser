@@ -1,5 +1,6 @@
 package com.example.indoorlocalization;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -41,14 +42,18 @@ public class NavigationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
+        Intent intent = getIntent();
+        Bundle fromMain = intent.getExtras();
         /* find View */
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
         direction = findViewById(R.id.direction);
         /* variables */
         int dist = 0;
-        // intent에서 받아오기
-        String start_point = "출발지 테스트", dest_point = "목적지 테스트";
+        /* intent에서 받아오기(출발위치, 목적위치) */
+        String start_point = "", dest_point = "";
+        start_point = fromMain.getString("start");
+        dest_point = fromMain.getString("dest");
 
         String sentence_dist = "남은 거리 : " + dist;
         remained_distance.setText(sentence_dist);
@@ -398,7 +403,7 @@ public class NavigationActivity extends AppCompatActivity {
 
     class SensorListener implements SensorEventListener {
         //각 센터 측정된 값 담을 배열
-        float [] accVlaue = new float[3];
+        float [] accVlaue = new float[3]; // Value 오타
         float [] magVlaue = new float[3];
 
         boolean isGetAcc = false;
