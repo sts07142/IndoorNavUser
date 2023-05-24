@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
 
@@ -29,8 +30,9 @@ public class NavigationActivity extends AppCompatActivity {
     private float mCurrentDegree = 0f;
     private static final int INFINITY = 99999;
     double[][] linkBox;
-    int cntLink,cntNode,startNodeIndex,endNodeIndex,currentNode,cursor,isPoint[];
+    int cntLink,cntNode,startNodeIndex,endNodeIndex,prevNode,currentNode,cursor,isPoint[];
     double graph[][][],route[],answerNode[];
+    long startTime, prevTime,finishTime,totalTime;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +50,7 @@ public class NavigationActivity extends AppCompatActivity {
         //이전 activity에서 intent로 받아옴
         //내 위치 계산하기
         currentNode=19;
+        prevNode=currentNode;
         startNodeIndex=currentNode;
         endNodeIndex=3;
 
@@ -56,6 +59,8 @@ public class NavigationActivity extends AppCompatActivity {
         findPath();
         startSensor();
 
+        startTime = System.currentTimeMillis();
+        prevTime = startTime;
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -65,45 +70,60 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
 
+
     void cycle(){
         while(currentNode!=endNodeIndex){
-            if(inPath()==false){
-                startNodeIndex=currentNode;
-                findPath();
-            }
-
-            runOnUiThread(new Runnable() {
-                @Override
-                public void run() {
-                    textView2.setText("다음 안내 : "+findPartDist()+" M\n남은 거리 : "+findFullDist()+" M");
-
-                    //남은 길 정보에 의해, 사용해야 할 화살표 0:일반화살표 1:왼쪽으로 꺽인 화살표 2:오른쪽으로 꺽인 화살표
-                    switch (arrowShape()){
-                        case 0:
-                            //이미지뷰의 소스를 일반 화살표로 설정한다
-                            break;
-                        case 1:
-                            //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
-                            break;
-                        case 2:
-                            //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
-                            break;
-                    }
+            //이전위치와 변화가 생겼을 때
+            if(prevNode!=currentNode){
+                //경로이탈
+                if(inPath()==false){
+                    Toast.makeText(getApplicationContext(), "경로를 이탈하였습니다.\n경로를 재탐색합니다.", Toast.LENGTH_LONG).show();
+                    startNodeIndex=currentNode;
+                    findPath();
                 }
-            });
+                //정보 갱신
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        textView2.setText("다음 안내 : "+findPartDist()+" M\n남은 거리 : "+findFullDist()+" M");
 
-
-            //1초 기다리기
-            try {
-                Thread.sleep(1000);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
+                        //남은 길 정보에 의해, 사용해야 할 화살표 0:일반화살표 1:왼쪽으로 꺽인 화살표 2:오른쪽으로 꺽인 화살표
+                        switch (arrowShape()){
+                            case -2:
+                                //이미지뷰의 소스를 일반 화살표로 설정한다
+                                Toast.makeText(getApplicationContext(), "5층 -> 4층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
+                                break;
+                            case -1:
+                                //이미지뷰의 소스를 일반 화살표로 설정한다
+                                Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
+                                break;
+                            case 0:
+                                //이미지뷰의 소스를 일반 화살표로 설정한다
+                                break;
+                            case 1:
+                                //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
+                                break;
+                            case 2:
+                                //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
+                                break;
+                        }
+                    }
+                });
             }
-            //내 위치 계산하기
-            currentNode=19;
+            //위치 계산이 실행된지 1초가 경과 했다면, 다시 계산
+            if(System.currentTimeMillis()-prevTime>=1000){
+                //내 위치 계산하기
+                prevNode=currentNode;
+                currentNode=19;
+            }
+
         }
         //while문이 끝났다는 것은 도착했다는 뜻
-
+        finishTime=System.currentTimeMillis();
+        totalTime=finishTime-startTime;
+        //경과 시간을 소수점 아래 2번째 자리까지 표시
+        Log.d("finish",String.format("%.2f",(double)totalTime/1000));
+        Toast.makeText(getApplicationContext(), "목적지에 도착하였습니다.\n소요시간 : "+String.format("%.2f",(double)totalTime/1000)+"초", Toast.LENGTH_LONG).show();
     }
 
     //fill node info
@@ -324,7 +344,15 @@ public class NavigationActivity extends AppCompatActivity {
                 dire1 = (int) graph[(int) answerNode[i]][(int) answerNode[i + 1]][1];
                 dire2 = (int) graph[(int) answerNode[i + 1]][(int) answerNode[i + 2]][1];
 
-                if (dire1 == dire2)
+                if(dire1<0 || dire2<0){
+                    if(dire1==-1)
+                        return -1;
+                    else if(dire1==-2)
+                        return -2;
+                    else
+                        return 0;
+                }
+                else if (dire1 == dire2)
                     return 0;
                 else if (dire1 > 180) {
                     if ((dire1 - 180) < dire2 && dire2 < dire1)
@@ -405,20 +433,46 @@ public class NavigationActivity extends AppCompatActivity {
                 float [] values = new float[3];
                 SensorManager.getOrientation(R, values);
                 float azimuth  = (int) ( Math.toDegrees( SensorManager.getOrientation( R, I)[0] ) + 360 ) % 360;
+                //같은 층간 이동시, 1층을 올라가야 할때, 1층을 내려가야 할때
+                if(aheadDirection()>=0){
+                    azimuth=(azimuth-aheadDirection())%360;
+                    RotateAnimation ra = new RotateAnimation(
+                            mCurrentDegree,
+                            -azimuth,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f
+                    );
+                    ra.setDuration(100);
+                    ra.setFillAfter(true);
+                    imageView.startAnimation(ra);
+                    mCurrentDegree = -azimuth;
+                }else if(aheadDirection()==-1){
+                    RotateAnimation ra = new RotateAnimation(
+                            0,
+                            0,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f
+                    );
+                    ra.setDuration(100);
+                    ra.setFillAfter(true);
+                    imageView.startAnimation(ra);
+                    mCurrentDegree = 0;
+                }else if(aheadDirection()==-2){
+                    RotateAnimation ra = new RotateAnimation(
+                            180,
+                            180,
+                            Animation.RELATIVE_TO_SELF, 0.5f,
+                            Animation.RELATIVE_TO_SELF, 0.5f
+                    );
+                    ra.setDuration(100);
+                    ra.setFillAfter(true);
+                    imageView.startAnimation(ra);
+                    mCurrentDegree = 180;
+                }
 
-                azimuth=(azimuth-aheadDirection())%360;
 //                imageView.setRotation(360-azimuth);
 
-                RotateAnimation ra = new RotateAnimation(
-                        mCurrentDegree,
-                        -azimuth,
-                        Animation.RELATIVE_TO_SELF, 0.5f,
-                        Animation.RELATIVE_TO_SELF, 0.5f
-                );
-                ra.setDuration(1);
-                ra.setFillAfter(true);
-                imageView.startAnimation(ra);
-                mCurrentDegree = -azimuth;
+
 
             }
         }
