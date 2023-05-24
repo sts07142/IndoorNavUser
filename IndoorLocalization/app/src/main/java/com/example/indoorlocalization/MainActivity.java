@@ -15,15 +15,18 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btn_start = (Button)findViewById(R.id.home_start_btn_tv);
-        btn_start.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
-                startActivity(intent);
+        btn_start = findViewById(R.id.home_start_btn_tv);
+        btn_start.setOnClickListener(v -> {
+            /* intent 정보 보내기 */
+            Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
+            Bundle toNavigation = new Bundle();
+            toNavigation.putString("start", "start address"); // 출발지 위치 - 현재 위치 바꾸기
+            toNavigation.putString("dest", "dest address"); // 목적지 위치 - 선택한 위치 바꾸기
 
-                finish();
-            }
+            intent.putExtras(toNavigation);
+            startActivity(intent);
+
+            finish();
         });
     }
 }

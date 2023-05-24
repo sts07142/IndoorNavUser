@@ -1,5 +1,6 @@
 package com.example.indoorlocalization;
 
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -21,12 +22,16 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    /* component variables */
+    TextView remained_distance; //남은 거리 표시
+    TextView address_point; //출발지, 목적지
+    ImageView direction; //안내 방향 표시 화살표
 
     //화살표 회전
-    private ImageView imageView;
+    //private ImageView imageView; // = direction
     SensorManager manager;
     SensorListener listener;
-    TextView textView2;
+    //TextView textView2; // = remained_distance
     private float mCurrentDegree = 0f;
     private static final int INFINITY = 99999;
     double[][] linkBox;
@@ -38,16 +43,38 @@ public class NavigationActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_navigation);
 
+        Intent intent = getIntent();
+        Bundle fromMain = intent.getExtras();
+        /* find View */
+        remained_distance = findViewById(R.id.remained_distance);
+        address_point = findViewById(R.id.navigation_textview_destination);
+        direction = findViewById(R.id.direction);
+        /* variables */
+        int dist = 0;
+        /* intent에서 받아오기(출발위치, 목적위치) */
+        String start_point = "", dest_point = "";
+        start_point = fromMain.getString("start");
+        dest_point = fromMain.getString("dest");
+
+        String sentence_dist = "남은 거리 : " + dist;
+        remained_distance.setText(sentence_dist);
+        String sentence_route = "출발지 : " + start_point + "\n목적지 : " + dest_point;
+        address_point.setText(sentence_route);
+
+        /* Rotate image view(user direction) */
+        int rotate = 0; // sample - 상황에 맞게 값 변경하기
+        //onDirectionRotate(rotate);
         Toast.makeText(getApplicationContext(), "경로 안내를 시작합니다.\n인터넷 연결이 끊어지지 않게 주의하세요.", Toast.LENGTH_LONG).show();
 
         //화살표 회전
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
         listener = new SensorListener();
-        imageView = (ImageView)findViewById(R.id.imageView2);
-
-        textView2=findViewById(R.id.textView2);
+        //imageView = (ImageView)findViewById(R.id.direction);
+        //textView2=findViewById(R.id.remained_distance);
 
         //이전 activity에서 intent로 받아옴
+        /* intent */
+
         //내 위치 계산하기
         currentNode=19;
         prevNode=currentNode;
@@ -70,7 +97,6 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
 
-
     void cycle(){
         while(currentNode!=endNodeIndex){
             //이전위치와 변화가 생겼을 때
@@ -85,7 +111,7 @@ public class NavigationActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        textView2.setText("다음 안내 : "+findPartDist()+" M\n남은 거리 : "+findFullDist()+" M");
+                        remained_distance.setText("다음 안내 : "+findPartDist()+" M\n남은 거리 : "+findFullDist()+" M");
 
                         //남은 길 정보에 의해, 사용해야 할 화살표 0:일반화살표 1:왼쪽으로 꺽인 화살표 2:오른쪽으로 꺽인 화살표
                         switch (arrowShape()){
@@ -400,8 +426,8 @@ public class NavigationActivity extends AppCompatActivity {
 
     class SensorListener implements SensorEventListener {
         //각 센터 측정된 값 담을 배열
-        float [] accVlaue = new float[3];
-        float [] magVlaue = new float[3];
+        float [] accValue = new float[3];
+        float [] magValue = new float[3];
 
         boolean isGetAcc = false;
         boolean isGetMag = false;
@@ -414,11 +440,11 @@ public class NavigationActivity extends AppCompatActivity {
 
             switch (type){
                 case Sensor.TYPE_ACCELEROMETER : //가속센서 라면
-                    System.arraycopy(event.values,0, accVlaue, 0, event.values.length);
+                    System.arraycopy(event.values,0, accValue, 0, event.values.length);
                     isGetAcc = true;
                     break;
                 case Sensor.TYPE_MAGNETIC_FIELD : //마그네틱 필드 라면
-                    System.arraycopy(event.values,0, magVlaue, 0, event.values.length);
+                    System.arraycopy(event.values,0, magValue, 0, event.values.length);
                     isGetMag = true;
                     break;
             }
@@ -428,7 +454,7 @@ public class NavigationActivity extends AppCompatActivity {
                 float [] R = new float[9];
                 float [] I = new float[9];
                 //행렬계산
-                SensorManager.getRotationMatrix(R,null, accVlaue,magVlaue);
+                SensorManager.getRotationMatrix(R,null, accValue,magValue);
                 //계산된 결과(R) -> 방위값으로 환산
                 float [] values = new float[3];
                 SensorManager.getOrientation(R, values);
@@ -444,7 +470,7 @@ public class NavigationActivity extends AppCompatActivity {
                     );
                     ra.setDuration(100);
                     ra.setFillAfter(true);
-                    imageView.startAnimation(ra);
+                    direction.startAnimation(ra);
                     mCurrentDegree = -azimuth;
                 }else if(aheadDirection()==-1){
                     RotateAnimation ra = new RotateAnimation(
@@ -455,7 +481,7 @@ public class NavigationActivity extends AppCompatActivity {
                     );
                     ra.setDuration(100);
                     ra.setFillAfter(true);
-                    imageView.startAnimation(ra);
+                    direction.startAnimation(ra);
                     mCurrentDegree = 0;
                 }else if(aheadDirection()==-2){
                     RotateAnimation ra = new RotateAnimation(
@@ -466,7 +492,7 @@ public class NavigationActivity extends AppCompatActivity {
                     );
                     ra.setDuration(100);
                     ra.setFillAfter(true);
-                    imageView.startAnimation(ra);
+                    direction.startAnimation(ra);
                     mCurrentDegree = 180;
                 }
 
@@ -480,5 +506,12 @@ public class NavigationActivity extends AppCompatActivity {
         public void onAccuracyChanged(Sensor sensor, int accuracy) {//감도변화
 
         }
+    }
+
+    // function : 경로에 따라 유저이미지의 방향 회전시키기
+    protected void onDirectionRotate(int value) {
+        // left, right, front, back
+        direction.setRotation(value);
+
     }
 }

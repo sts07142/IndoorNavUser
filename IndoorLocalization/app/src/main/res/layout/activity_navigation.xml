@@ -41,7 +41,7 @@
             app:textAllCaps="false" />
 
         <ImageView
-            android:id="@+id/imageView2"
+            android:id="@+id/direction"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="250dp"
@@ -51,7 +51,7 @@
             app:srcCompat="@drawable/ic_nav" />
 
         <TextView
-            android:id="@+id/textView2"
+            android:id="@+id/remained_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginBottom="50dp"
