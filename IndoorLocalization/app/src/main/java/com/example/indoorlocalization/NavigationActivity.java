@@ -7,7 +7,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
@@ -131,6 +133,16 @@ public class NavigationActivity extends AppCompatActivity {
                                 //direction.setImageResource(R.drawable.ic_arrow_upward);
                                 onDirectionRotate(0);
                                 img_popup.setImageResource(R.drawable.ic_baseline_stairs);
+                                /* sample - img popup 안 보이게 하기 */
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        img_popup.setVisibility(View.INVISIBLE);
+
+                                    }
+                                },3000);	//3초 동안 딜레이
+
                                 break;
                             case 0:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다

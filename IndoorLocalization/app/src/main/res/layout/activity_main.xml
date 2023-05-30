@@ -59,12 +59,12 @@
                             android:layout_height="40dp"/>
 
                         <TextView
-                            android:id="@+id/home_estimated_time_text_tv"
+                            android:id="@+id/selected_destination"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="20dp"
                             android:layout_gravity="center"
-                            android:text="ㅁㅁㅁ호 까지\n예상 소요 시간 : mm분"
+                            android:text="선택한 목적지 : "
                             android:textColor="@color/black"
                             android:textAlignment="center"
                             android:textSize="20sp"
