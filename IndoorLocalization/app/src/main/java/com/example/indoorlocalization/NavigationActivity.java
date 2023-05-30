@@ -9,6 +9,8 @@ import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
@@ -16,8 +18,21 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+
+
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +45,9 @@ public class NavigationActivity extends AppCompatActivity {
     ImageView direction; //안내 방향 표시 화살표
     ImageView img_popup; //안내 팝업 이미지
 
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    PreviewView previewView;
+
     //화살표 회전
     //private ImageView imageView; // = direction
     SensorManager manager;
@@ -41,6 +59,7 @@ public class NavigationActivity extends AppCompatActivity {
     int cntLink,cntNode,startNodeIndex,endNodeIndex,prevNode,currentNode,cursor,isPoint[];
     double graph[][][],route[],answerNode[];
     long startTime, prevTime,finishTime,totalTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,6 +72,19 @@ public class NavigationActivity extends AppCompatActivity {
         address_point = findViewById(R.id.navigation_textview_destination);
         direction = findViewById(R.id.direction);
         img_popup = findViewById(R.id.view_popup);
+
+        /* temp */
+        previewView = findViewById(R.id.preview);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                bindPreview(cameraProvider);
+            } catch (ExecutionException | InterruptedException e) {
+                // No errors need to be handled for this Future.
+                // This should never be reached.
+            }
+        }, ContextCompat.getMainExecutor(this));
 
         /* variables */
         int dist = 0;
@@ -101,7 +133,18 @@ public class NavigationActivity extends AppCompatActivity {
         }).start();
 
     }
+    void bindPreview(ProcessCameraProvider cameraProvider) {
+        Preview preview = new Preview.Builder()
+                .build();
 
+        CameraSelector cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build();
+
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+
+        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
+    }
     void cycle(){
         while(currentNode!=endNodeIndex){
             //이전위치와 변화가 생겼을 때
