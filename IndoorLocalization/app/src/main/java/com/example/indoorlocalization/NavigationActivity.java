@@ -26,6 +26,7 @@ public class NavigationActivity extends AppCompatActivity {
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
     ImageView direction; //안내 방향 표시 화살표
+    ImageView img_popup; //안내 팝업 이미지
 
     //화살표 회전
     //private ImageView imageView; // = direction
@@ -49,6 +50,8 @@ public class NavigationActivity extends AppCompatActivity {
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
         direction = findViewById(R.id.direction);
+        img_popup = findViewById(R.id.view_popup);
+
         /* variables */
         int dist = 0;
         /* intent에서 받아오기(출발위치, 목적위치) */
@@ -118,16 +121,21 @@ public class NavigationActivity extends AppCompatActivity {
                             case -2:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "5층 -> 4층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                direction.setImageResource(R.drawable.ic_arrow_upward);
+                                //direction.setImageResource(R.drawable.ic_arrow_upward);
+                                onDirectionRotate(0);
+                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
                                 break;
                             case -1:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                direction.setImageResource(R.drawable.ic_arrow_upward);
+                                //direction.setImageResource(R.drawable.ic_arrow_upward);
+                                onDirectionRotate(0);
+                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
                                 break;
                             case 0:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
-                                direction.setImageResource(R.drawable.ic_arrow_upward);
+                                //direction.setImageResource(R.drawable.ic_arrow_upward);
+                                img_popup.setImageResource(R.drawable.ic_arrow_upward);
                                 break;
                             case 1:
                                 //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
@@ -416,9 +424,8 @@ public class NavigationActivity extends AppCompatActivity {
 
     //화살표 회전 (ahead North)
     public void startSensor(){
-
-        Sensor sensor1 = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);    //가속도 센서
-        Sensor sensor2 = manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);    //Magnetic센서
+        Sensor sensor1 = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);   //가속도 센서
+        Sensor sensor2 = manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);   //Magnetic센서
         //아래 만들었던 리스너 연결
         manager.registerListener(listener, sensor1, SensorManager.SENSOR_DELAY_UI);
         manager.registerListener(listener, sensor2, SensorManager.SENSOR_DELAY_UI);

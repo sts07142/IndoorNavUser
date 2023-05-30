@@ -20,11 +20,11 @@
             android:id="@+id/view"
             android:layout_width="match_parent"
             android:layout_height="400dp"
-            android:layout_marginTop="25dp"
+            android:layout_marginTop="24dp"
+            android:background="#8F9193"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/navigation_textview_destination"
-            android:background="#8F9193" />
+            app:layout_constraintTop_toBottomOf="@+id/navigation_textview_destination" />
 
         <TextView
             android:id="@+id/navigation_textview_destination"
@@ -49,6 +49,16 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@+id/view"
             app:srcCompat="@drawable/ic_nav" />
+
+        <ImageView
+            android:id="@+id/view_popup"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginTop="52dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/view"
+            app:srcCompat="@drawable/ic_baseline_stairs" />
 
         <TextView
             android:id="@+id/remained_distance"

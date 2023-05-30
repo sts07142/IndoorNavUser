@@ -1,9 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_back.xml" value="0.1565" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_left.xml" value="0.1" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_turn_left.xml" value="0.1" />
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_arrow_upward.xml" value="0.1565" />
+        <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_baseline_stairs.xml" value="0.1" />
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/drawable/ic_nav.xml" value="0.1565" />
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/layout/activity_main.xml" value="0.146875" />
         <entry key="..\:/Users/jha2e/Desktop/as/IndoorNavUser/IndoorLocalization/app/src/main/res/layout/activity_navigation.xml" value="0.16666666666666666" />
@@ -11,7 +15,7 @@
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" default="true" project-jdk-name="jbr-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">
