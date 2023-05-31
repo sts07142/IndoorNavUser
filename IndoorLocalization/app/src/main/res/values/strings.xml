@@ -1,3 +1,39 @@
 <resources>
     <string name="app_name">Indoor Localization</string>
+    <string-array name="class_number">
+        <item>1호</item>
+        <item>2호</item>
+        <item>3호</item>
+        <item>4호</item>
+        <item>5호</item>
+        <item>6호</item>
+        <item>7호</item>
+        <item>8호</item>
+        <item>9호</item>
+        <item>11호</item>
+        <item>12호</item>
+        <item>13호</item>
+        <item>14호</item>
+        <item>15호</item>
+        <item>16호</item>
+        <item>17호</item>
+        <item>18호</item>
+        <item>19호</item>
+        <item>20호</item>
+        <item>21호</item>
+        <item>22호</item>
+        <item>23호</item>
+        <item>24호</item>
+        <item>25호</item>
+        <item>26호</item>
+        <item>27호</item>
+        <item>28호</item>
+        <item>29호</item>
+        <item>30호</item>
+        <item>31호</item>
+        <item>32호</item>
+        <item>33호</item>
+        <item>34호</item>
+        <item>35호</item>
+    </string-array>
 </resources>
