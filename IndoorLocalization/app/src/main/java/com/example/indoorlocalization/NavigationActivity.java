@@ -7,26 +7,60 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    String serverUrl = "http://aeong.pythonanywhere.com";
+    OkHttpClient client = new OkHttpClient();
+
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
+    TextView current_position; // 현재 위치
     ImageView direction; //안내 방향 표시 화살표
     ImageView img_popup; //안내 팝업 이미지
+
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    PreviewView previewView;
 
     //화살표 회전
     //private ImageView imageView; // = direction
@@ -39,6 +73,7 @@ public class NavigationActivity extends AppCompatActivity {
     int cntLink,cntNode,startNodeIndex,endNodeIndex,prevNode,currentNode,cursor,isPoint[];
     double graph[][][],route[],answerNode[];
     long startTime, prevTime,finishTime,totalTime;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,8 +84,23 @@ public class NavigationActivity extends AppCompatActivity {
         /* find View */
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
+        current_position = findViewById(R.id.current_position);
         direction = findViewById(R.id.direction);
-        img_popup = findViewById(R.id.view_popup);
+        img_popup = findViewById(R.id.view_popup); //for stair_image
+        // 현재 위치 변수 만들기
+
+        /* temp */
+        previewView = findViewById(R.id.preview);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                bindPreview(cameraProvider);
+            } catch (ExecutionException | InterruptedException e) {
+                // No errors need to be handled for this Future.
+                // This should never be reached.
+            }
+        }, ContextCompat.getMainExecutor(this));
 
         /* variables */
         int dist = 0;
@@ -99,7 +149,52 @@ public class NavigationActivity extends AppCompatActivity {
         }).start();
 
     }
+    void bindPreview(ProcessCameraProvider cameraProvider) {
+        Preview preview = new Preview.Builder()
+                .build();
 
+        CameraSelector cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build();
+
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
+    }
+
+    // OkHttp 클라이언트 인스턴스 생성
+
+    // JSON 데이터 전송 메서드 정의
+    public void sendJsonData(String url, JSONObject jsonData) {
+        String endpoint = serverUrl + "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+
+        // JSON 요청 본문 생성
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonData.toString()
+        );
+
+        // OkHttp Request 객체 생성
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .post(requestBody) // POST 요청으로 설정
+                .build();
+
+        // 네트워크 요청 보내기
+        try {
+            Response response = client.newCall(request).execute();
+
+            // 응답 처리
+            if (response.isSuccessful()) {
+                String responseData = response.body().string();
+                // 응답 데이터 처리
+                // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
+            } else {
+                // 응답이 실패한 경우 처리
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     void cycle(){
         while(currentNode!=endNodeIndex){
             //이전위치와 변화가 생겼을 때
@@ -128,22 +223,33 @@ public class NavigationActivity extends AppCompatActivity {
                             case -1:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                //direction.setImageResource(R.drawable.ic_arrow_upward);
                                 onDirectionRotate(0);
-                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
+                                //img_popup.setImageResource(R.drawable.ic_baseline_stairs);
+                                img_popup.setVisibility(View.VISIBLE);
+                                /* sample - 3초 뒤 img popup 안 보이게 하기 */
+                                Handler handler = new Handler();
+                                handler.postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        img_popup.setVisibility(View.INVISIBLE);
+
+                                    }
+                                },3000);	//3초 동안 딜레이
+
                                 break;
                             case 0:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 //direction.setImageResource(R.drawable.ic_arrow_upward);
-                                img_popup.setImageResource(R.drawable.ic_arrow_upward);
+                                img_popup.setVisibility(View.INVISIBLE);
+
                                 break;
                             case 1:
                                 //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
-                                direction.setImageResource(R.drawable.ic_arrow_turn_left);
+                                //img_popup.setImageResource(R.drawable.ic_arrow_turn_left);
                                 break;
                             case 2:
                                 //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
-                                direction.setImageResource(R.drawable.ic_arrow_turn_right);
+                                //img_popup.setImageResource(R.drawable.ic_arrow_turn_right);
                                 break;
                         }
                     }
@@ -508,19 +614,16 @@ public class NavigationActivity extends AppCompatActivity {
                     mCurrentDegree = 180;
                 }
 
-//                imageView.setRotation(360-azimuth);
-
-
 
             }
         }
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {//감도변화
+        public void onAccuracyChanged(Sensor sensor, int accuracy) { //감도변화
 
         }
     }
 
-    // function : 경로에 따라 유저이미지의 방향 회전시키기
+    // function : 경로에 따라 유저 이미지의 방향 회전시키기
     protected void onDirectionRotate(int value) {
         // left, right, front, back
         direction.setRotation(value);
