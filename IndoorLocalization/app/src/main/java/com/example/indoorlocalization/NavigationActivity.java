@@ -42,6 +42,7 @@ public class NavigationActivity extends AppCompatActivity {
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
+    TextView current_position; // 현재 위치
     ImageView direction; //안내 방향 표시 화살표
     ImageView img_popup; //안내 팝업 이미지
 
@@ -70,8 +71,10 @@ public class NavigationActivity extends AppCompatActivity {
         /* find View */
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
+        current_position = findViewById(R.id.current_position);
         direction = findViewById(R.id.direction);
-        img_popup = findViewById(R.id.view_popup);
+        img_popup = findViewById(R.id.view_popup); //for stair_image
+        // 현재 위치 변수 만들기
 
         /* temp */
         previewView = findViewById(R.id.preview);
@@ -142,7 +145,6 @@ public class NavigationActivity extends AppCompatActivity {
                 .build();
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
-
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
     }
     void cycle(){
@@ -173,10 +175,10 @@ public class NavigationActivity extends AppCompatActivity {
                             case -1:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                //direction.setImageResource(R.drawable.ic_arrow_upward);
                                 onDirectionRotate(0);
-                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
-                                /* sample - img popup 안 보이게 하기 */
+                                //img_popup.setImageResource(R.drawable.ic_baseline_stairs);
+                                img_popup.setVisibility(View.VISIBLE);
+                                /* sample - 3초 뒤 img popup 안 보이게 하기 */
                                 Handler handler = new Handler();
                                 handler.postDelayed(new Runnable() {
                                     @Override
@@ -190,15 +192,16 @@ public class NavigationActivity extends AppCompatActivity {
                             case 0:
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 //direction.setImageResource(R.drawable.ic_arrow_upward);
-                                img_popup.setImageResource(R.drawable.ic_arrow_upward);
+                                img_popup.setVisibility(View.INVISIBLE);
+
                                 break;
                             case 1:
                                 //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
-                                direction.setImageResource(R.drawable.ic_arrow_turn_left);
+                                //img_popup.setImageResource(R.drawable.ic_arrow_turn_left);
                                 break;
                             case 2:
                                 //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
-                                direction.setImageResource(R.drawable.ic_arrow_turn_right);
+                                //img_popup.setImageResource(R.drawable.ic_arrow_turn_right);
                                 break;
                         }
                     }
@@ -563,19 +566,16 @@ public class NavigationActivity extends AppCompatActivity {
                     mCurrentDegree = 180;
                 }
 
-//                imageView.setRotation(360-azimuth);
-
-
 
             }
         }
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {//감도변화
+        public void onAccuracyChanged(Sensor sensor, int accuracy) { //감도변화
 
         }
     }
 
-    // function : 경로에 따라 유저이미지의 방향 회전시키기
+    // function : 경로에 따라 유저 이미지의 방향 회전시키기
     protected void onDirectionRotate(int value) {
         // left, right, front, back
         direction.setRotation(value);

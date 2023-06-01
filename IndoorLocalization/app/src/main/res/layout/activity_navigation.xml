@@ -28,25 +28,26 @@
         <androidx.camera.view.PreviewView
             android:id="@+id/preview"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="450dp"
             app:layout_constraintBottom_toBottomOf="@+id/view"
             app:layout_constraintEnd_toEndOf="@+id/view"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/view"
             app:layout_constraintTop_toTopOf="@+id/view"
-            app:layout_constraintVertical_bias="0.1
-" />
+            app:layout_constraintVertical_bias="0"
+        />
 
         <TextView
             android:id="@+id/navigation_textview_destination"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="출발지 : AI공학관 304호\n목적지 : AI공학관 412호"
+            android:textColor="@color/white"
             android:textSize="25sp"
             android:textStyle="bold"
-            android:textColor="@color/white"
             app:layout_constraintBottom_toTopOf="@+id/view"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:textAllCaps="false" />
@@ -75,13 +76,25 @@
             android:id="@+id/remained_distance"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="50dp"
-            android:textSize="20sp"
-            android:textColor="@color/white"
             android:text="다음 안내 : 0 M\n남은 거리 : 0 M"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            app:layout_constraintBottom_toBottomOf="@+id/preview"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
+
+        <TextView
+            android:id="@+id/current_position"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="현재위치 : "
+            android:textColor="@color/white"
+            android:textSize="25sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="@+id/preview"
+            app:layout_constraintStart_toStartOf="@+id/preview"
+            app:layout_constraintTop_toBottomOf="@+id/preview" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>
