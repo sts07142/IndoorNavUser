@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 if (position != 0){
                     dest = roomList[position];
-                    destination.setText(dest + " 까지");
+                    destination.setText("선택한 목적지: " + dest);
                 }
 
             }
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
 
         // 시작 버튼 클릭
 
-        selected_point = findViewById(R.id.selected_destination);
+//        selected_point = findViewById(R.id.selected_destination);
         btn_start = findViewById(R.id.home_start_btn_tv);
         btn_start.setOnClickListener(v -> {
             if (dest == ""){
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         
-        selected_point.setText("선택한 목적지" + "");
+//        selected_point.setText("선택한 목적지" + "");
 // Inside onCreate() or a relevant initialization method
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
