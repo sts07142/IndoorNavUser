@@ -31,6 +31,16 @@ import java.util.concurrent.ExecutionException;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 
@@ -39,6 +49,9 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    String serverUrl = "http://aeong.pythonanywhere.com";
+    OkHttpClient client = new OkHttpClient();
+
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
@@ -146,6 +159,41 @@ public class NavigationActivity extends AppCompatActivity {
 
         preview.setSurfaceProvider(previewView.getSurfaceProvider());
         Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
+    }
+
+    // OkHttp 클라이언트 인스턴스 생성
+
+    // JSON 데이터 전송 메서드 정의
+    public void sendJsonData(String url, JSONObject jsonData) {
+        String endpoint = serverUrl + "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+
+        // JSON 요청 본문 생성
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonData.toString()
+        );
+
+        // OkHttp Request 객체 생성
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .post(requestBody) // POST 요청으로 설정
+                .build();
+
+        // 네트워크 요청 보내기
+        try {
+            Response response = client.newCall(request).execute();
+
+            // 응답 처리
+            if (response.isSuccessful()) {
+                String responseData = response.body().string();
+                // 응답 데이터 처리
+                // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
+            } else {
+                // 응답이 실패한 경우 처리
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     void cycle(){
         while(currentNode!=endNodeIndex){
