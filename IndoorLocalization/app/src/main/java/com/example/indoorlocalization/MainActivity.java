@@ -1,7 +1,11 @@
 package com.example.indoorlocalization;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -12,6 +16,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +33,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
+import java.util.List;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -40,27 +46,30 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 100;
+    private static final int PERMISSION_REQUEST_CODE = 123;
+
     private WifiManager wifiManager;
+    private BroadcastReceiver wifiScanReceiver;
+
 
     Button btn_start;
     Spinner floor_sp, room_sp;
     TextView destination, startLoc;
     TextView selected_point;
-    String start,dest = "";
+    String start, dest = "";
 
-//    String[] floorList = {"4층", "5층"};
+    //    String[] floorList = {"4층", "5층"};
 //    Resources res = getResources();
-    String[] roomList = {"강의실 선택", "401호","402호","403호","404호","405호","406호",
-            "407호","408호","409호","410호","411호","412호","413호",
-            "414호","415호", "416호", "417호","418호","419호", "420호",
+    String[] roomList = {"강의실 선택", "401호", "402호", "403호", "404호", "405호", "406호",
+            "407호", "408호", "409호", "410호", "411호", "412호", "413호",
+            "414호", "415호", "416호", "417호", "418호", "419호", "420호",
             "421호", "422호", "423호", "424호", "425호",
             "426호", "427호", "428호", "429호", "430호", "431호", "432호", "433호", "434호", "435호",
-        "501호","502호","503호","504호","505호","506호",
-        "507호","508호","509호","510호","511호","512호","513호",
-        "514호","515호","516호","517호","518호","519호", "520호",
-        "521호", "522호", "523호", "524호", "525호",
-        "526호", "527호", "528호", "529호", "530호", "531호", "532호", "533호", "534호", "535호" };
-  
+            "501호", "502호", "503호", "504호", "505호", "506호",
+            "507호", "508호", "509호", "510호", "511호", "512호", "513호",
+            "514호", "515호", "516호", "517호", "518호", "519호", "520호",
+            "521호", "522호", "523호", "524호", "525호",
+            "526호", "527호", "528호", "529호", "530호", "531호", "532호", "533호", "534호", "535호"};
 
 
     @Override
@@ -68,11 +77,20 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+        // Inside onCreate() or a relevant initialization method
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
+        } else {
+            // Continue with camera setup
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
+        }
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);//와이파이 신호를 받아오기위한 wifi메니저 인스턴스
 
         startLoc = (TextView) findViewById(R.id.home_now_location_tv);
         String tmp = startLoc.getText().toString();
-        start = tmp.substring(tmp.length()-4);
+        start = tmp.substring(tmp.length() - 4);
 
         //spinner
         room_sp = (Spinner) findViewById(R.id.home_destination_sp);
@@ -90,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
         room_sp.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                if (position != 0){
+                if (position != 0) {
                     dest = roomList[position];
                     destination.setText("선택한 목적지: " + dest);
                 }
@@ -105,16 +123,19 @@ public class MainActivity extends AppCompatActivity {
 
         /* wifi 정보 수집 */
         fetchDataFromServer(); //test
-        // scanWifiData();
+        try {
+            scanWifiData();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        }
 
         // 시작 버튼 클릭
 //      selected_point = findViewById(R.id.selected_destination);
         btn_start = findViewById(R.id.home_start_btn_tv);
         btn_start.setOnClickListener(v -> {
-            if (dest == ""){
+            if (dest == "") {
                 Toast.makeText(this, "목적지를 선택해주세요", Toast.LENGTH_SHORT).show();
-            }
-            else {
+            } else {
                 /* intent 정보 보내기 */
                 Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
                 Bundle toNavigation = new Bundle();
@@ -127,16 +148,12 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
-        
+
 //        selected_point.setText("선택한 목적지" + "");
-// Inside onCreate() or a relevant initialization method
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.CAMERA}, REQUEST_CAMERA_PERMISSION);
-        } else {
-            // Continue with camera setup
-        }
+
 
     }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -188,10 +205,29 @@ public class MainActivity extends AppCompatActivity {
 
     // scan wifi data in here!
     private void scanWifiData() throws JSONException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // 권한이 거부되었을 경우 종료
+            return;
+        }
         JSONObject jsonData = new JSONObject();
+        List<ScanResult> results = wifiManager.getScanResults();
+        for (ScanResult result : results) {
+            String ssid = result.SSID;
+            String bssid = result.BSSID;
+            int signalStrength = result.level;
 
-
-        jsonData.put("test", "temp");
+            // jsonData에 결과 추가
+            try {
+                JSONObject wifiData = new JSONObject();
+                wifiData.put("ssid", ssid);
+                wifiData.put("bssid", bssid);
+                wifiData.put("signalStrength", signalStrength);
+                Log.d("wifi data", wifiData.toString());
+                jsonData.put(ssid, wifiData);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
         sendJsonData(jsonData);
 }
     // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
@@ -219,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                Log.d("API why", response.toString());
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
                     // 응답 데이터 처리
@@ -238,7 +275,9 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onFailure(Call call, IOException e) {
+
                 // 요청 실패 처리
+                Log.e("API failure", e.getMessage());
             }
         });
     }
