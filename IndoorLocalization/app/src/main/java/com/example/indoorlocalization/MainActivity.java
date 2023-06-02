@@ -10,8 +10,10 @@ import androidx.core.content.ContextCompat;
 import android.content.Intent;
 
 import android.content.pm.PackageManager;
-
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -21,16 +23,29 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
 import java.lang.reflect.Array;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 100;
+    private WifiManager wifiManager;
 
     Button btn_start;
-
     Spinner floor_sp, room_sp;
     TextView destination, startLoc;
+    TextView selected_point;
     String start,dest = "";
 
 //    String[] floorList = {"4층", "5층"};
@@ -46,13 +61,14 @@ public class MainActivity extends AppCompatActivity {
         "521호", "522호", "523호", "524호", "525호",
         "526호", "527호", "528호", "529호", "530호", "531호", "532호", "533호", "534호", "535호" };
   
-    TextView selected_point;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
 
         startLoc = (TextView) findViewById(R.id.home_now_location_tv);
         String tmp = startLoc.getText().toString();
@@ -87,11 +103,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
+        /* wifi 정보 수집 */
 
         // 시작 버튼 클릭
-
-//        selected_point = findViewById(R.id.selected_destination);
+//      selected_point = findViewById(R.id.selected_destination);
         btn_start = findViewById(R.id.home_start_btn_tv);
         btn_start.setOnClickListener(v -> {
             if (dest == ""){
@@ -132,4 +147,61 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     }
+
+
+
+    // scan wifi data in here!
+    private void scanWifiData() throws JSONException {
+        JSONObject jsonData = new JSONObject();
+
+
+        jsonData.put("test", "temp");
+        sendJsonData(jsonData);
+}
+    // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
+    private void sendJsonData(JSONObject jsonData) {
+        String serverUrl = "http://aeong.pythonanywhere.com";
+
+        // OkHttp 클라이언트 인스턴스 생성
+        OkHttpClient client = new OkHttpClient();
+        String endpoint = serverUrl; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+        //JSONObject msg = new JSONObject();
+
+        // JSON 요청 본문 생성
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonData.toString()
+        );
+
+        // OkHttp Request 객체 생성
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .post(requestBody) // POST 요청으로 설정
+                .build();
+
+        // 비동기적으로 요청을 보내고 응답 처리를 위한 콜백 등록
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    // 응답 데이터 처리
+                    // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
+                    // 출발 위치 응답받아 넣기, 출발 위치 설정하기
+                    // startLoc.setText(responseData);
+                    // start = responseData;
+                    Log.d("API success ", responseData);
+                } else {
+                    // 응답이 실패한 경우 처리
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // 요청 실패 처리
+            }
+        });
+    }
+
+
 }

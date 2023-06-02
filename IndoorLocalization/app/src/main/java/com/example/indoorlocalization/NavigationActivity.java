@@ -50,6 +50,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    /* for connecting Flask server */
     String serverUrl = "http://aeong.pythonanywhere.com";
     OkHttpClient client = new OkHttpClient();
 
@@ -70,6 +71,7 @@ public class NavigationActivity extends AppCompatActivity {
     int cntLink,cntNode,startNodeIndex,endNodeIndex,prevNode,currentNode,cursor,isPoint[];
     double graph[][][],route[],answerNode[];
     long startTime, prevTime,finishTime,totalTime;
+
     String start_point = "", dest_point = "";
     int starter=0;
     @Override

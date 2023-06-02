@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.IndoorLocalization"
+        android:usesCleartextTraffic="true"
         tools:targetApi="31">
         <meta-data
             android:name="androidx.camera.camera_common.default_config"
