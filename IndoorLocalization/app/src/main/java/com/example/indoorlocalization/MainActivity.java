@@ -104,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /* wifi 정보 수집 */
+        fetchDataFromServer(); //test
+        // scanWifiData();
 
         // 시작 버튼 클릭
 //      selected_point = findViewById(R.id.selected_destination);
@@ -148,7 +150,41 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // API 연결 확인용 - 데이터 요청
+    public void fetchDataFromServer() {
+        String serverUrl = "http://aeong.pythonanywhere.com";
+        String endpoint = serverUrl + "/"; // 실제 엔드포인트 경로를 추가합니다.
 
+        // OkHttp Request 객체 생성
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .build();
+        OkHttpClient client = new OkHttpClient();
+        // 비동기적으로 요청을 보내고 응답 처리를 위한 콜백 등록
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    // 응답 데이터 처리
+                    // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
+                    Log.d("API test", responseData);
+                    // TextView의 텍스트 변경
+                    String tmp = "현재 위치 : " + responseData;
+                    runOnUiThread(() -> {
+                        startLoc.setText(tmp);
+                    });
+                } else {
+                    // 응답이 실패한 경우 처리
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // 요청 실패 처리
+            }
+        });
+    }
 
     // scan wifi data in here!
     private void scanWifiData() throws JSONException {
@@ -164,7 +200,7 @@ public class MainActivity extends AppCompatActivity {
 
         // OkHttp 클라이언트 인스턴스 생성
         OkHttpClient client = new OkHttpClient();
-        String endpoint = serverUrl; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+        String endpoint = serverUrl + '/'; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
         //JSONObject msg = new JSONObject();
 
         // JSON 요청 본문 생성
@@ -188,7 +224,11 @@ public class MainActivity extends AppCompatActivity {
                     // 응답 데이터 처리
                     // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
-                    // startLoc.setText(responseData);
+                    // TextView의 텍스트 변경
+                    String tmp = "현재 위치 : " + responseData;
+                    runOnUiThread(() -> {
+                        startLoc.setText(tmp);
+                    });
                     // start = responseData;
                     Log.d("API success ", responseData);
                 } else {
