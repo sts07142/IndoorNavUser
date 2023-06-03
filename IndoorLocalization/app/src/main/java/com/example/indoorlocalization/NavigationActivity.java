@@ -68,7 +68,7 @@ public class NavigationActivity extends AppCompatActivity {
     double graph[][][],route[],answerNode[];
     long startTime, prevTime,finishTime,totalTime;
 
-    String start_point = "", dest_point = "";
+    String start_point = "", end_point = "";
     int starter=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -102,11 +102,13 @@ public class NavigationActivity extends AppCompatActivity {
         int dist = 0;
         /* intent에서 받아오기(출발위치, 목적위치) */
         start_point = fromMain.getString("start");
-        dest_point = fromMain.getString("dest");
+        Log.d("StartPoint",  start_point);
+        end_point = fromMain.getString("dest");
+        Log.d("EndPoint",  end_point);
 
         String sentence_dist = "남은 거리 : " + dist;
         remained_distance.setText(sentence_dist);
-        String sentence_route = "출발지 : " + start_point + "\n목적지 : " + dest_point;
+        String sentence_route = "출발지 :" + start_point + "\n목적지 : " + end_point;
         address_point.setText(sentence_route);
 
         /* Rotate image view(user direction) */
@@ -125,7 +127,7 @@ public class NavigationActivity extends AppCompatActivity {
         currentNode=46;
         prevNode=currentNode;
         startNodeIndex=currentNode;
-        endNodeIndex=changeToNode(dest_point);
+        endNodeIndex=changeToNode(end_point);
 
         fillNode();
         fillPath();
