@@ -43,15 +43,13 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
+import android.media.MediaPlayer;
 
 public class MainActivity extends AppCompatActivity {
     private static final int REQUEST_CAMERA_PERMISSION = 100;
-    private static final int PERMISSION_REQUEST_CODE = 123;
 
     private WifiManager wifiManager;
-    private BroadcastReceiver wifiScanReceiver;
-
-
+    private MediaPlayer mediaPlayer;
     Button btn_start;
     Spinner floor_sp, room_sp;
     TextView destination, startLoc;
@@ -139,10 +137,12 @@ public class MainActivity extends AppCompatActivity {
                 /* intent 정보 보내기 */
                 Intent intent = new Intent(getApplicationContext(), NavigationActivity.class);
                 Bundle toNavigation = new Bundle();
+
                 toNavigation.putString("start", start); // 출발지 위치 - 현재 위치 바꾸기
                 toNavigation.putString("dest", dest); // 목적지 위치 - 선택한 위치 바꾸기
-
                 intent.putExtras(toNavigation);
+
+                playSoundEffect();
                 startActivity(intent);
 
                 finish();
@@ -281,6 +281,18 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+    private void playSoundEffect() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_success);
+        mediaPlayer.start();
 
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
+    }
 
 }

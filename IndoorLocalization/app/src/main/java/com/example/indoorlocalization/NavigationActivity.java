@@ -6,6 +6,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -17,7 +18,7 @@ import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import android.media.MediaPlayer;
 
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
@@ -50,6 +51,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    private MediaPlayer mediaPlayer;
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
@@ -220,6 +222,7 @@ public class NavigationActivity extends AppCompatActivity {
                 //경로이탈
                 if(inPath()==false){
                     Log.d("path","경로 이탈");
+                    playSound_wrong(); //효과음 재생
                     runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -235,6 +238,7 @@ public class NavigationActivity extends AppCompatActivity {
                     public void run() {
                         remained_distance.setText("다음 안내 : "+String.format("%.2f",findPartDist())+" M\n남은 거리 : "+String.format("%.2f",findFullDist())+" M");
                         Log.d("path","남은 거리 갱신");
+                        playSound_next(); //sound 효과음 재생
                         //남은 길 정보에 의해, 사용해야 할 화살표 0:일반화살표 1:왼쪽으로 꺽인 화살표 2:오른쪽으로 꺽인 화살표
                         switch (arrowShape()){
                             case -2:
@@ -296,6 +300,7 @@ public class NavigationActivity extends AppCompatActivity {
         totalTime=finishTime-startTime;
         //경과 시간을 소수점 아래 2번째 자리까지 표시
         Log.d("finish",String.format("%.2f",(double)totalTime/1000));
+        playSound_success(); //효과음 재생
         Toast.makeText(getApplicationContext(), "목적지에 도착하였습니다.\n소요시간 : "+String.format("%.2f",(double)totalTime/1000)+"초", Toast.LENGTH_LONG).show();
     }
 
@@ -682,5 +687,45 @@ public class NavigationActivity extends AppCompatActivity {
             node+=50;
 
         return node;
+    }
+
+    private void playSound_next() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_next);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
+    }
+    private void playSound_wrong() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_caution);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
+    }
+    private void playSound_success() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_success);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
     }
 }
