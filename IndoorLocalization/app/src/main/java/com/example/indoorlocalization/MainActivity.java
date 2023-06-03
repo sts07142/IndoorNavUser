@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
 
         startLoc = (TextView) findViewById(R.id.home_now_location_tv);
         String tmp = startLoc.getText().toString();
-        start = tmp.substring(tmp.length() - 4);
+        start = tmp.substring(7);
 
         //spinner
         room_sp = (Spinner) findViewById(R.id.home_destination_sp);
