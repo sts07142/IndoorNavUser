@@ -28,6 +28,7 @@ import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -170,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     // API 연결 확인용 - 데이터 요청
     public void fetchDataFromServer() {
         String serverUrl = "http://aeong.pythonanywhere.com";
-        String endpoint = serverUrl + "/"; // 실제 엔드포인트 경로를 추가합니다.
+        String endpoint = serverUrl + "/location";
 
         // OkHttp Request 객체 생성
         Request request = new Request.Builder()
@@ -211,24 +212,47 @@ public class MainActivity extends AppCompatActivity {
         }
         JSONObject jsonData = new JSONObject();
         List<ScanResult> results = wifiManager.getScanResults();
-        for (ScanResult result : results) {
-            String ssid = result.SSID;
+
+//        for (ScanResult result : results) {
+//            String ssid = result.SSID;
+//            String bssid = result.BSSID;
+//            int signalStrength = result.level;
+//
+//            // jsonData에 결과 추가
+//            try {
+//                JSONObject wifiData = new JSONObject();
+//                //wifiData.put("ssid", ssid);
+//                wifiData.put("bssid", bssid);
+//                wifiData.put("signalStrength", signalStrength);
+//                Log.d("wifi data", wifiData.toString());
+//                jsonData.put("wifi", wifiData);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        sendJsonData(jsonData);
+
+        JSONArray wifiArray = new JSONArray();
+        for (ScanResult result : results){
             String bssid = result.BSSID;
             int signalStrength = result.level;
 
-            // jsonData에 결과 추가
-            try {
-                JSONObject wifiData = new JSONObject();
-                wifiData.put("ssid", ssid);
-                wifiData.put("bssid", bssid);
-                wifiData.put("signalStrength", signalStrength);
-                Log.d("wifi data", wifiData.toString());
-                jsonData.put(ssid, wifiData);
-            } catch (JSONException e) {
+            JSONObject wifi= new JSONObject();
+            try{
+                wifi.put("BSSID",bssid);
+                wifi.put("RSSID",signalStrength);
+                wifiArray.put(wifi);
+            }catch(JSONException e){
                 e.printStackTrace();
             }
         }
-        sendJsonData(jsonData);
+        try{
+            jsonData.put("wifi",wifiArray);
+            sendJsonData(jsonData);
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+
 }
     // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
     private void sendJsonData(JSONObject jsonData) {
