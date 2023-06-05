@@ -171,7 +171,7 @@ public class MainActivity extends AppCompatActivity {
     // API 연결 확인용 - 데이터 요청
     public void fetchDataFromServer() {
         String serverUrl = "http://aeong.pythonanywhere.com";
-        String endpoint = serverUrl + "/location";
+        String endpoint = serverUrl + "/";
 
         // OkHttp Request 객체 생성
         Request request = new Request.Builder()
@@ -260,7 +260,7 @@ public class MainActivity extends AppCompatActivity {
 
         // OkHttp 클라이언트 인스턴스 생성
         OkHttpClient client = new OkHttpClient();
-        String endpoint = serverUrl + '/'; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+        String endpoint = serverUrl + '/' + "location"; // 실제 엔드포인트 경로를 추가합니다
         //JSONObject msg = new JSONObject();
 
         // JSON 요청 본문 생성
