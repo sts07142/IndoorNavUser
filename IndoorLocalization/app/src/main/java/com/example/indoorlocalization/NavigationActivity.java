@@ -6,39 +6,72 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
+import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.media.MediaPlayer;
 
-import androidx.annotation.Nullable;
+import androidx.camera.core.Camera;
+import androidx.camera.core.CameraSelector;
+import androidx.camera.core.Preview;
+import androidx.camera.lifecycle.ProcessCameraProvider;
+import androidx.camera.view.PreviewView;
+import androidx.core.content.ContextCompat;
+import androidx.lifecycle.LifecycleOwner;
+
+import com.google.common.util.concurrent.ListenableFuture;
+import java.util.concurrent.ExecutionException;
+
 import androidx.appcompat.app.AppCompatActivity;
+
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+
+import okhttp3.MediaType;
+import okhttp3.RequestBody;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    private MediaPlayer mediaPlayer;
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
+    TextView current_position; // 현재 위치
     ImageView direction; //안내 방향 표시 화살표
     ImageView img_popup; //안내 팝업 이미지
 
-    //화살표 회전
-    //private ImageView imageView; // = direction
+    private ListenableFuture<ProcessCameraProvider> cameraProviderFuture;
+    PreviewView previewView;
     SensorManager manager;
     SensorListener listener;
-    //TextView textView2; // = remained_distance
     private float mCurrentDegree = 0f;
     private static final int INFINITY = 99999;
     double[][] linkBox;
     int cntLink,cntNode,startNodeIndex,endNodeIndex,prevNode,currentNode,cursor,isPoint[];
     double graph[][][],route[],answerNode[];
     long startTime, prevTime,finishTime,totalTime;
+
+    String start_point = "", end_point = "";
+    int starter=0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -49,45 +82,61 @@ public class NavigationActivity extends AppCompatActivity {
         /* find View */
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
+        current_position = findViewById(R.id.current_position);
         direction = findViewById(R.id.direction);
-        img_popup = findViewById(R.id.view_popup);
+        img_popup = findViewById(R.id.view_popup); //for stair_image
+        // 현재 위치 변수 만들기
+
+        /* temp */
+        previewView = findViewById(R.id.preview);
+        cameraProviderFuture = ProcessCameraProvider.getInstance(this);
+        cameraProviderFuture.addListener(() -> {
+            try {
+                ProcessCameraProvider cameraProvider = cameraProviderFuture.get();
+                bindPreview(cameraProvider);
+            } catch (ExecutionException | InterruptedException e) {
+                // No errors need to be handled for this Future.
+                // This should never be reached.
+            }
+        }, ContextCompat.getMainExecutor(this));
 
         /* variables */
         int dist = 0;
         /* intent에서 받아오기(출발위치, 목적위치) */
-        String start_point = "", dest_point = "";
         start_point = fromMain.getString("start");
-        dest_point = fromMain.getString("dest");
+        Log.d("StartPoint",  start_point);
+        end_point = fromMain.getString("dest");
+        Log.d("EndPoint",  end_point);
 
         String sentence_dist = "남은 거리 : " + dist;
         remained_distance.setText(sentence_dist);
-        String sentence_route = "출발지 : " + start_point + "\n목적지 : " + dest_point;
+        String sentence_route = "출발지 :" + start_point + "\n목적지 : " + end_point;
         address_point.setText(sentence_route);
 
         /* Rotate image view(user direction) */
         int rotate = 0; // sample - 상황에 맞게 값 변경하기
         //onDirectionRotate(rotate);
-        Toast.makeText(getApplicationContext(), "경로 안내를 시작합니다.\n인터넷 연결이 끊어지지 않게 주의하세요.", Toast.LENGTH_LONG).show();
+        Toast.makeText(getApplicationContext(), "경로 안내를 시작합니다.\n인터넷 연결이 끊어지지 않게 주의하세요.", Toast.LENGTH_SHORT).show();
 
         //화살표 회전
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
         listener = new SensorListener();
-        //imageView = (ImageView)findViewById(R.id.direction);
-        //textView2=findViewById(R.id.remained_distance);
 
         //이전 activity에서 intent로 받아옴
         /* intent */
 
         //내 위치 계산하기
-        currentNode=19;
+        currentNode=46;
         prevNode=currentNode;
         startNodeIndex=currentNode;
-        endNodeIndex=3;
+        endNodeIndex=changeToNode(end_point);
 
         fillNode();
         fillPath();
         findPath();
         startSensor();
+
+        img_popup.setVisibility(View.INVISIBLE);
 
         startTime = System.currentTimeMillis();
         prevTime = startTime;
@@ -99,14 +148,87 @@ public class NavigationActivity extends AppCompatActivity {
         }).start();
 
     }
+    void bindPreview(ProcessCameraProvider cameraProvider) {
+        Preview preview = new Preview.Builder()
+                .build();
 
+        CameraSelector cameraSelector = new CameraSelector.Builder()
+                .requireLensFacing(CameraSelector.LENS_FACING_BACK)
+                .build();
+
+        preview.setSurfaceProvider(previewView.getSurfaceProvider());
+        Camera camera = cameraProvider.bindToLifecycle((LifecycleOwner)this, cameraSelector, preview);
+    }
+
+    // scan wifi data in here!
+    private void scanWifiData() throws JSONException {
+        JSONObject jsonData = new JSONObject();
+
+
+        jsonData.put("test", "temp");
+        sendJsonData(jsonData);
+    }
+    // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
+    private void sendJsonData(JSONObject jsonData) {
+        /* for connecting Flask server */
+        String serverUrl = "http://aeong.pythonanywhere.com";
+        // OkHttp 클라이언트 인스턴스 생성
+        OkHttpClient client = new OkHttpClient();
+
+        String endpoint = serverUrl; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
+        //JSONObject msg = new JSONObject();
+
+        // JSON 요청 본문 생성
+        RequestBody requestBody = RequestBody.create(
+                MediaType.parse("application/json; charset=utf-8"),
+                jsonData.toString()
+        );
+
+        // OkHttp Request 객체 생성
+        Request request = new Request.Builder()
+                .url(endpoint)
+                .post(requestBody) // POST 요청으로 설정
+                .build();
+
+        // 비동기적으로 요청을 보내고 응답 처리를 위한 콜백 등록
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    String responseData = response.body().string();
+                    // 응답 데이터 처리
+                    // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
+                    // 출발 위치 응답받아 넣기, 출발 위치 설정하기
+                    // startLoc.setText(responseData);
+                    // start = responseData;
+                    Log.d("API success ", responseData);
+                } else {
+                    // 응답이 실패한 경우 처리
+                }
+            }
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                // 요청 실패 처리
+            }
+        });
+    }
     void cycle(){
         while(currentNode!=endNodeIndex){
             //이전위치와 변화가 생겼을 때
-            if(prevNode!=currentNode){
+            if(prevNode!=currentNode || starter==0){
+                starter++;
+                Log.d("path","위치 변화");
                 //경로이탈
                 if(inPath()==false){
-                    Toast.makeText(getApplicationContext(), "경로를 이탈하였습니다.\n경로를 재탐색합니다.", Toast.LENGTH_LONG).show();
+                    Log.d("path","경로 이탈");
+                    playSound_wrong(); //효과음 재생
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "경로를 이탈하였습니다.\n경로를 재탐색합니다.", Toast.LENGTH_LONG).show();
+                        }
+                    });
                     startNodeIndex=currentNode;
                     findPath();
                 }
@@ -114,36 +236,52 @@ public class NavigationActivity extends AppCompatActivity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        remained_distance.setText("다음 안내 : "+findPartDist()+" M\n남은 거리 : "+findFullDist()+" M");
-
+                        remained_distance.setText("다음 안내 : "+String.format("%.2f",findPartDist())+" M\n남은 거리 : "+String.format("%.2f",findFullDist())+" M");
+                        Log.d("path","남은 거리 갱신");
+                        playSound_next(); //sound 효과음 재생
                         //남은 길 정보에 의해, 사용해야 할 화살표 0:일반화살표 1:왼쪽으로 꺽인 화살표 2:오른쪽으로 꺽인 화살표
                         switch (arrowShape()){
                             case -2:
+                                Log.d("path","층간 이동 필요 5-4");
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "5층 -> 4층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                //direction.setImageResource(R.drawable.ic_arrow_upward);
+                                direction.setImageResource(R.drawable.ic_nav);
+                                img_popup.setVisibility(View.VISIBLE);
                                 onDirectionRotate(0);
-                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
                                 break;
                             case -1:
+                                Log.d("path","층간 이동 필요 4-5");
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
                                 Toast.makeText(getApplicationContext(), "4층 -> 5층으로 이동이 필요합니다.\n계단/엘레베이터를 이용해주세요.", Toast.LENGTH_LONG).show();
-                                //direction.setImageResource(R.drawable.ic_arrow_upward);
                                 onDirectionRotate(0);
-                                img_popup.setImageResource(R.drawable.ic_baseline_stairs);
+                                img_popup.setVisibility(View.VISIBLE);
+//                                /* sample - 3초 뒤 img popup 안 보이게 하기 */
+//                                Handler handler = new Handler();
+//                                handler.postDelayed(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        img_popup.setVisibility(View.INVISIBLE);
+//
+//                                    }
+//                                },3000);	//3초 동안 딜레이
                                 break;
                             case 0:
+                                Log.d("path","직진");
                                 //이미지뷰의 소스를 일반 화살표로 설정한다
-                                //direction.setImageResource(R.drawable.ic_arrow_upward);
-                                img_popup.setImageResource(R.drawable.ic_arrow_upward);
+                                direction.setImageResource(R.drawable.ic_nav);
+                                img_popup.setVisibility(View.INVISIBLE);
                                 break;
                             case 1:
+                                Log.d("path","좌회전");
                                 //이미지뷰의 소스를 왼쪽으로 꺽인 화살표로 설정한다
                                 direction.setImageResource(R.drawable.ic_arrow_turn_left);
+                                img_popup.setVisibility(View.INVISIBLE);
                                 break;
                             case 2:
+                                Log.d("path","우회전");
                                 //이미지뷰의 소스를 오른쪽으로 꺽인 화살표로 설정한다
                                 direction.setImageResource(R.drawable.ic_arrow_turn_right);
+                                img_popup.setVisibility(View.INVISIBLE);
                                 break;
                         }
                     }
@@ -153,7 +291,7 @@ public class NavigationActivity extends AppCompatActivity {
             if(System.currentTimeMillis()-prevTime>=1000){
                 //내 위치 계산하기
                 prevNode=currentNode;
-                currentNode=19;
+                currentNode=startNodeIndex;
             }
 
         }
@@ -162,6 +300,7 @@ public class NavigationActivity extends AppCompatActivity {
         totalTime=finishTime-startTime;
         //경과 시간을 소수점 아래 2번째 자리까지 표시
         Log.d("finish",String.format("%.2f",(double)totalTime/1000));
+        playSound_success(); //효과음 재생
         Toast.makeText(getApplicationContext(), "목적지에 도착하였습니다.\n소요시간 : "+String.format("%.2f",(double)totalTime/1000)+"초", Toast.LENGTH_LONG).show();
     }
 
@@ -184,12 +323,21 @@ public class NavigationActivity extends AppCompatActivity {
 
         isPoint=new int[cntNode];
 
-        for(int i=0; i<cntNode; i++)
-            try {
-                isPoint[i] = Integer.parseInt(line[i]);
-            }catch (NumberFormatException e){
+        for(int i=0; i<cntNode; i++){
+            String g= (line[i]).toString().trim();
+            Log.d("node",g);
+            if(i==0){
                 isPoint[i] = 0;
             }
+            else if(g.equals("0")){
+                isPoint[i] = 0;
+            }else{
+                isPoint[i] = 1;
+            }
+
+            Log.d("node","isPoint["+i+"] "+isPoint[i]);
+        }
+
 
 
         isPoint[endNodeIndex]=1;
@@ -355,6 +503,7 @@ public class NavigationActivity extends AppCompatActivity {
         for(int i=cursor; i<answerNode.length-1; i++){
             distance+=graph[(int) answerNode[i]][(int) answerNode[i+1]][0];
         }
+        Log.d("path","남은 전체 거리 "+distance);
         return distance;
     }
 
@@ -363,10 +512,13 @@ public class NavigationActivity extends AppCompatActivity {
         double distance=0;
         for(int i=cursor; i<answerNode.length-1; i++){
             distance+=graph[(int) answerNode[i]][(int) answerNode[i+1]][0];
-            if(i!=cursor)
-                if(1==isPoint[i])
-                    return distance;
+            if(1==isPoint[i+1]){
+                Log.d("path","Point "+(i+1));
+                Log.d("path","남은 부분 거리 "+distance);
+                return distance;
+            }
         }
+        Log.d("path","남은 부분 거리 "+distance);
         return distance;
     }
 
@@ -378,35 +530,38 @@ public class NavigationActivity extends AppCompatActivity {
     //return arrow shape 0 : straight 1 : left 2 : right
     int arrowShape(){
         int dire1 = 0,dire2=0;
-        for(int i=cursor; i<answerNode.length; i++) {
-            if (i != cursor && 1 == isPoint[i] && i != answerNode.length) {
-                dire1 = (int) graph[(int) answerNode[i]][(int) answerNode[i + 1]][1];
-                dire2 = (int) graph[(int) answerNode[i + 1]][(int) answerNode[i + 2]][1];
-
-                if(dire1<0 || dire2<0){
-                    if(dire1==-1)
-                        return -1;
-                    else if(dire1==-2)
-                        return -2;
-                    else
-                        return 0;
-                }
-                else if (dire1 == dire2)
-                    return 0;
-                else if (dire1 > 180) {
-                    if ((dire1 - 180) < dire2 && dire2 < dire1)
-                        return 1;
-                    else
-                        return 2;
-                } else {
-                    if (dire1 < dire2 && dire2 < dire1 + 180)
-                        return 2;
-                    else
-                        return 1;
-                }
-            }
-
+        Log.d("path","화살표 설정");
+        if((int) graph[(int) answerNode[cursor]][(int) answerNode[cursor+1]][1]==-2){
+            return -2;
+        }else if((int) graph[(int) answerNode[cursor]][(int) answerNode[cursor+1]][1]==-1){
+            return -1;
         }
+        else
+            for(int i=cursor; i<answerNode.length-1; i++) {
+                if (i != cursor && 1 == isPoint[i] && i != answerNode.length) {
+                    dire1 = (int) graph[(int) answerNode[i-1]][(int) answerNode[i]][1];
+                    dire2 = (int) graph[(int) answerNode[i]][(int) answerNode[i+1]][1];
+                    Log.d("path","dire1:"+dire1);
+                    Log.d("path","dire2:"+dire2);
+                    if(dire1<0 || dire2<0){
+                            return 0;
+                    }
+                    else if (dire1 == dire2)
+                        return 0;
+                    else if (dire1 > 180) {
+                        if ((dire1 - 180) < dire2 && dire2 < dire1)
+                            return 1;
+                        else
+                            return 2;
+                    } else {
+                        if (dire1 < dire2 && dire2 < dire1 + 180)
+                            return 2;
+                        else
+                            return 1;
+                    }
+                }
+
+            }
         return 0;
     }
 
@@ -508,22 +663,69 @@ public class NavigationActivity extends AppCompatActivity {
                     mCurrentDegree = 180;
                 }
 
-//                imageView.setRotation(360-azimuth);
-
-
 
             }
         }
         @Override
-        public void onAccuracyChanged(Sensor sensor, int accuracy) {//감도변화
+        public void onAccuracyChanged(Sensor sensor, int accuracy) { //감도변화
 
         }
     }
 
-    // function : 경로에 따라 유저이미지의 방향 회전시키기
+    // function : 경로에 따라 유저 이미지의 방향 회전시키기
     protected void onDirectionRotate(int value) {
         // left, right, front, back
         direction.setRotation(value);
 
+    }
+    int changeToNode(String dest_point){
+        int stair= Integer.parseInt(String.valueOf(dest_point.charAt(0)));
+        int room= Integer.parseInt(dest_point.substring(1,3));
+
+        int node= (room-1);
+        if(stair==5)
+            node+=50;
+
+        return node;
+    }
+
+    private void playSound_next() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_next);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
+    }
+    private void playSound_wrong() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_caution);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
+    }
+    private void playSound_success() {
+        mediaPlayer = MediaPlayer.create(this, R.raw.sfx_success);
+        mediaPlayer.start();
+
+        // 효과음 재생이 끝나면 MediaPlayer를 해제합니다.
+        mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+            @Override
+            public void onCompletion(MediaPlayer mp) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+            }
+        });
     }
 }
