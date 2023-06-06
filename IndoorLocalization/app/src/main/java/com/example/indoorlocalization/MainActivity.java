@@ -240,7 +240,7 @@ public class MainActivity extends AppCompatActivity {
             JSONObject wifi= new JSONObject();
             try{
                 wifi.put("BSSID",bssid);
-                wifi.put("RSSID",signalStrength);
+                wifi.put("RSSI",signalStrength);
                 wifiArray.put(wifi);
             }catch(JSONException e){
                 e.printStackTrace();
@@ -280,13 +280,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 Log.d("API why", response.toString());
+                String location;
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
+                    JSONObject jObject = null;
+                    try {
+                        jObject = new JSONObject(responseData);
+                        location = jObject.getString("msg");
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     // 응답 데이터 처리
-                    // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
-                    String tmp = "현재 위치 : " + responseData;
+                    String tmp = "현재 위치 : " + location;
                     runOnUiThread(() -> {
                         startLoc.setText(tmp);
                     });
