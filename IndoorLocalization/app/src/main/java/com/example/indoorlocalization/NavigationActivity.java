@@ -1,12 +1,18 @@
 package com.example.indoorlocalization;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorListener;
 import android.hardware.SensorManager;
 import android.media.MediaPlayer;
+import android.net.wifi.ScanResult;
+import android.net.wifi.WifiManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -29,6 +35,8 @@ import androidx.core.content.ContextCompat;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -41,6 +49,8 @@ import okhttp3.Response;
 
 import okhttp3.MediaType;
 import okhttp3.RequestBody;
+
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -51,6 +61,7 @@ import java.io.InputStream;
 import java.util.Date;
 
 public class NavigationActivity extends AppCompatActivity {
+    private WifiManager wifiManager;
     private MediaPlayer mediaPlayer;
     /* component variables */
     TextView remained_distance; //남은 거리 표시
@@ -86,6 +97,7 @@ public class NavigationActivity extends AppCompatActivity {
         direction = findViewById(R.id.direction);
         img_popup = findViewById(R.id.view_popup); //for stair_image
         // 현재 위치 변수 만들기
+        wifiManager = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);//와이파이 신호를 받아오기위한 wifi메니저 인스턴스
 
         /* temp */
         previewView = findViewById(R.id.preview);
@@ -147,6 +159,17 @@ public class NavigationActivity extends AppCompatActivity {
             }
         }).start();
 
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    scanWifiData();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
+
     }
     void bindPreview(ProcessCameraProvider cameraProvider) {
         Preview preview = new Preview.Builder()
@@ -162,20 +185,44 @@ public class NavigationActivity extends AppCompatActivity {
 
     // scan wifi data in here!
     private void scanWifiData() throws JSONException {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // 권한이 거부되었을 경우 종료
+            return;
+        }
         JSONObject jsonData = new JSONObject();
+        List<ScanResult> results = wifiManager.getScanResults();
 
+        JSONArray wifiArray = new JSONArray();
+        for (ScanResult result : results){
+            String bssid = result.BSSID;
+            int signalStrength = result.level;
 
-        jsonData.put("test", "temp");
-        sendJsonData(jsonData);
+            JSONObject wifi= new JSONObject();
+            try{
+                wifi.put("BSSID",bssid);
+                wifi.put("RSSI",signalStrength);
+                wifiArray.put(wifi);
+            }catch(JSONException e){
+                e.printStackTrace();
+            }
+        }
+        try{
+            jsonData.put("wifi",wifiArray);
+            sendJsonData(jsonData);
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+
     }
     // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
     private void sendJsonData(JSONObject jsonData) {
         /* for connecting Flask server */
         String serverUrl = "http://aeong.pythonanywhere.com";
+        String endpoint = serverUrl + "/location";
+
         // OkHttp 클라이언트 인스턴스 생성
         OkHttpClient client = new OkHttpClient();
 
-        String endpoint = serverUrl; //+ "/api/endpoint"; // 실제 엔드포인트 경로를 추가합니다
         //JSONObject msg = new JSONObject();
 
         // JSON 요청 본문 생성
@@ -194,14 +241,27 @@ public class NavigationActivity extends AppCompatActivity {
         client.newCall(request).enqueue(new Callback() {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                String location;
                 if (response.isSuccessful()) {
                     String responseData = response.body().string();
+                    JSONObject jObject = null;
+                    try {
+                        jObject = new JSONObject(responseData);
+                        location = jObject.getString("msg");
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
+                    }
+
                     // 응답 데이터 처리
-                    // TODO: 응답 데이터를 파싱하거나 필요한 처리를 수행하세요.
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
-                    // startLoc.setText(responseData);
+                    // TextView의 텍스트 변경
+                    String tmp = "현재위치 : " + location;
+                    runOnUiThread(() -> {
+                        current_position.setText(tmp);
+
+                    });
                     // start = responseData;
-                    Log.d("API success ", responseData);
+                    Log.d("API2 success ", responseData);
                 } else {
                     // 응답이 실패한 경우 처리
                 }
