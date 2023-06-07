@@ -121,7 +121,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
         /* wifi 정보 수집 */
-        fetchDataFromServer(); //test
+        //fetchDataFromServer(); //test
         try {
             scanWifiData();
         } catch (JSONException e) {
@@ -149,9 +149,6 @@ public class MainActivity extends AppCompatActivity {
                 finish();
             }
         });
-
-//        selected_point.setText("선택한 목적지" + "");
-
 
     }
 
@@ -257,10 +254,10 @@ public class MainActivity extends AppCompatActivity {
     // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
     private void sendJsonData(JSONObject jsonData) {
         String serverUrl = "http://aeong.pythonanywhere.com";
+        String endpoint = serverUrl + '/' + "location"; // 실제 엔드포인트 경로를 추가합니다
 
         // OkHttp 클라이언트 인스턴스 생성
         OkHttpClient client = new OkHttpClient();
-        String endpoint = serverUrl + '/' + "location"; // 실제 엔드포인트 경로를 추가합니다
         //JSONObject msg = new JSONObject();
 
         // JSON 요청 본문 생성
@@ -287,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         jObject = new JSONObject(responseData);
                         location = jObject.getString("msg");
+                        start = location;
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -297,6 +295,7 @@ public class MainActivity extends AppCompatActivity {
                     String tmp = "현재 위치 : " + location;
                     runOnUiThread(() -> {
                         startLoc.setText(tmp);
+
                     });
                     // start = responseData;
                     Log.d("API success ", responseData);
