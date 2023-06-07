@@ -126,7 +126,7 @@ public class NavigationActivity extends AppCompatActivity {
         /* intent */
 
         //내 위치 계산하기
-        currentNode=46;
+        currentNode=changeToNode(start_point);
         prevNode=currentNode;
         startNodeIndex=currentNode;
         endNodeIndex=changeToNode(end_point);
@@ -291,7 +291,7 @@ public class NavigationActivity extends AppCompatActivity {
             if(System.currentTimeMillis()-prevTime>=1000){
                 //내 위치 계산하기
                 prevNode=currentNode;
-                currentNode=startNodeIndex;
+                currentNode=changeToNode(start_point);
             }
 
         }
@@ -301,7 +301,12 @@ public class NavigationActivity extends AppCompatActivity {
         //경과 시간을 소수점 아래 2번째 자리까지 표시
         Log.d("finish",String.format("%.2f",(double)totalTime/1000));
         playSound_success(); //효과음 재생
-        Toast.makeText(getApplicationContext(), "목적지에 도착하였습니다.\n소요시간 : "+String.format("%.2f",(double)totalTime/1000)+"초", Toast.LENGTH_LONG).show();
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), "목적지에 도착하였습니다.\n소요시간 : "+String.format("%.2f",(double)totalTime/1000)+"초", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     //fill node info
