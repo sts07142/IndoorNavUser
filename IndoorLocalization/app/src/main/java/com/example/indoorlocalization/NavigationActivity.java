@@ -128,7 +128,7 @@ public class NavigationActivity extends AppCompatActivity {
         /* Rotate image view(user direction) */
         int rotate = 0; // sample - 상황에 맞게 값 변경하기
         //onDirectionRotate(rotate);
-        Toast.makeText(getApplicationContext(), "경로 안내를 시작합니다.\n인터넷 연결이 끊어지지 않게 주의하세요.", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getApplicationContext(), "경로 안내를 시작합니다.", Toast.LENGTH_SHORT).show();
 
         //화살표 회전
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
@@ -390,7 +390,6 @@ public class NavigationActivity extends AppCompatActivity {
 
         for(int i=0; i<cntNode; i++){
             String g= (line[i]).toString().trim();
-            Log.d("node",g);
             if(i==0){
                 isPoint[i] = 0;
             }
@@ -399,8 +398,6 @@ public class NavigationActivity extends AppCompatActivity {
             }else{
                 isPoint[i] = 1;
             }
-
-            Log.d("node","isPoint["+i+"] "+isPoint[i]);
         }
 
 
@@ -744,14 +741,89 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
     int changeToNode(String dest_point){
-        int stair= Integer.parseInt(String.valueOf(dest_point.charAt(0)));
-        int room= Integer.parseInt(dest_point.substring(1,3));
+        dest_point=dest_point.trim();
+        dest_point=dest_point.replaceAll("[층,/,호, ]","");
+        if(dest_point.equals("NOINFO") || dest_point.equals("")|| dest_point.equals(" ")){
+            return changeToNode(start_point);
+        }else{
+            String stair= String.valueOf(dest_point.charAt(0));
+            int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
+            int node=0;
 
-        int node= (room-1);
-        if(stair==5)
-            node+=50;
+            if(stair.equals("4")){
+                node=(room-1);
+            }else if(stair.equals("5")){
+                node=(room-1);
+                node+=50;
+            }else if(stair.equals("t")){
+                if(room==1){
+                    node=40;
+                }else if(room==2){
+                    node=42;
+                }else if(room==3){
+                    node=41;
+                }else if(room==4){
+                    node=43;
+                }else if(room==5){
+                    node=35;
+                }else if(room==6){
+                    node=39;
+                }else if(room==7){
+                    node=36;
+                }else if(room==8){
+                    node=38;
+                }else if(room==9){
+                    node=37;
+                }else if(room==10){
+                    node=88;
+                }else if(room==11){
+                    node=86;
+                }else if(room==12){
+                    node=87;
+                }else if(room==13){
+                    node=89;
+                }else if(room==14){
+                    node=85;
+                }else if(room==15){
+                    node=92;
+                }else if(room==16){
+                    node=90;
+                }else if(room==17){
+                    node=91;
+                }else if(room==18){
+                    node=93;
+                }else if(room==19){
+                    node=44;
+                }else if(room==20){
+                    node=47;
+                }else if(room==21){
+                    node=45;
+                }else if(room==22){
+                    node=48;
+                }else if(room==23){
+                    node=46;
+                }else if(room==24){
+                    node=94;
+                }else if(room==25){
+                    node=97;
+                }else if(room==26){
+                    node=95;
+                }else if(room==27){
+                    node=98;
+                }else if(room==28){
+                    node=96;
+                }else if(room==29){
+                    //존재하지 않음
+                }else if(room==30){
+                    node=49;
+                }else if(room==31){
+                    node=99;
+                }
+            }
 
-        return node;
+            return node;
+        }
+
     }
 
     private void playSound_next() {
