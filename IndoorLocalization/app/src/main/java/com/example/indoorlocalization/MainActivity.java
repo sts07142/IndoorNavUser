@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity {
     Button btn_start;
     Spinner floor_sp, room_sp;
     TextView destination, startLoc;
-    TextView selected_point;
     String start, dest = "";
 
     //    String[] floorList = {"4층", "5층"};
