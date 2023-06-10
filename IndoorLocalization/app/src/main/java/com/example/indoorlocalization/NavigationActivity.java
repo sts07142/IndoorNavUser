@@ -350,6 +350,8 @@ public class NavigationActivity extends AppCompatActivity {
             //위치 계산이 실행된지 1초가 경과 했다면, 다시 계산
             if(System.currentTimeMillis()-prevTime>=1000){
                 //내 위치 계산하기
+                Log.d("path","위치 갱신");
+                prevTime=System.currentTimeMillis();
                 prevNode=currentNode;
                 currentNode=changeToNode(start_point);
             }
@@ -744,7 +746,8 @@ public class NavigationActivity extends AppCompatActivity {
         dest_point=dest_point.trim();
         dest_point=dest_point.replaceAll("[층,/,호, ]","");
         if(dest_point.equals("NOINFO") || dest_point.equals("")|| dest_point.equals(" ")){
-            return changeToNode(start_point);
+//            return changeToNode(start_point);
+            return 0;
         }else{
             String stair= String.valueOf(dest_point.charAt(0));
             int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
