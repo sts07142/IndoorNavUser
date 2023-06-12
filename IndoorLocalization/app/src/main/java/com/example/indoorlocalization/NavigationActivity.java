@@ -122,7 +122,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         String sentence_dist = "남은 거리 : " + dist;
         remained_distance.setText(sentence_dist);
-        String sentence_route = "출발지 : " + start_point + "\n목적지 : " + end_point;
+        String sentence_route = "출발지 : " + changeToRoom(Integer.parseInt(start_point)) + "\n목적지 : " + end_point;
         address_point.setText(sentence_route);
 
         /* Rotate image view(user direction) */
@@ -146,7 +146,7 @@ public class NavigationActivity extends AppCompatActivity {
         }).start();
 
         //내 위치 계산하기
-        currentNode=changeToNode(start_point);
+        currentNode= Integer.parseInt(start_point);
         prevNode=currentNode;
         startNodeIndex=currentNode;
         endNodeIndex=changeToNode(end_point);
@@ -288,6 +288,7 @@ public class NavigationActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             Toast.makeText(getApplicationContext(), "경로를 이탈하였습니다.\n경로를 재탐색합니다.", Toast.LENGTH_LONG).show();
+                            address_point.setText("출발지 : " + changeToRoom(Integer.parseInt(start_point)) + "\n목적지 : " + end_point);
                         }
                     });
                     startNodeIndex=currentNode;
@@ -352,16 +353,13 @@ public class NavigationActivity extends AppCompatActivity {
             if(System.currentTimeMillis()-prevTime>=1000){
                 //내 위치 계산하기
                 Log.d("path","위치 갱신");
+                prevTime=System.currentTimeMillis();
                 try {
                     scanWifiData();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
-                prevTime=System.currentTimeMillis();
-//                prevNode=currentNode;
-//                currentNode=changeToNode(start_point);
             }
-
         }
         //while문이 끝났다는 것은 도착했다는 뜻
         finishTime=System.currentTimeMillis();
@@ -753,7 +751,7 @@ public class NavigationActivity extends AppCompatActivity {
         dest_point=dest_point.replaceAll("[층,/,호, ]","");
         if(dest_point.equals("NOINFO") || dest_point.equals("")|| dest_point.equals(" ")){
 //            return changeToNode(start_point);
-            return 0;
+            return 44;
         }else{
             String stair= String.valueOf(dest_point.charAt(0));
             int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
