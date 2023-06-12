@@ -122,7 +122,7 @@ public class NavigationActivity extends AppCompatActivity {
 
         String sentence_dist = "남은 거리 : " + dist;
         remained_distance.setText(sentence_dist);
-        String sentence_route = "출발지 :" + start_point + "\n목적지 : " + end_point;
+        String sentence_route = "출발지 : " + start_point + "\n목적지 : " + end_point;
         address_point.setText(sentence_route);
 
         /* Rotate image view(user direction) */
@@ -134,8 +134,16 @@ public class NavigationActivity extends AppCompatActivity {
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
         listener = new SensorListener();
 
-        //이전 activity에서 intent로 받아옴
-        /* intent */
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    scanWifiData();
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }).start();
 
         //내 위치 계산하기
         currentNode=changeToNode(start_point);
@@ -156,17 +164,6 @@ public class NavigationActivity extends AppCompatActivity {
             @Override
             public void run() {
                 cycle();
-            }
-        }).start();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    scanWifiData();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
-                }
             }
         }).start();
 
@@ -255,6 +252,10 @@ public class NavigationActivity extends AppCompatActivity {
                     // 응답 데이터 처리
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
+                    Log.d("API","현재위치 : "+location);
+                    prevNode=currentNode;
+                    currentNode=changeToNode(location);
+
                     location=changeToRoom(changeToNode(location));
                     String tmp = "현재위치 : " + location;
                     runOnUiThread(() -> {
@@ -348,14 +349,14 @@ public class NavigationActivity extends AppCompatActivity {
                     }
                 });
             }
-            //위치 계산이 실행된지 1초가 경과 했다면, 다시 계산
-            if(System.currentTimeMillis()-prevTime>=1000){
-                //내 위치 계산하기
-                Log.d("path","위치 갱신");
-                prevTime=System.currentTimeMillis();
-                prevNode=currentNode;
-                currentNode=changeToNode(start_point);
-            }
+//            //위치 계산이 실행된지 1초가 경과 했다면, 다시 계산
+//            if(System.currentTimeMillis()-prevTime>=1000){
+//                //내 위치 계산하기
+//                Log.d("path","위치 갱신");
+//                prevTime=System.currentTimeMillis();
+//                prevNode=currentNode;
+//                currentNode=changeToNode(start_point);
+//            }
 
         }
         //while문이 끝났다는 것은 도착했다는 뜻
