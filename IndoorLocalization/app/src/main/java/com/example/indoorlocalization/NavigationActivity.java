@@ -255,6 +255,7 @@ public class NavigationActivity extends AppCompatActivity {
                     // 응답 데이터 처리
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
+                    location=changeToRoom(changeToNode(location));
                     String tmp = "현재위치 : " + location;
                     runOnUiThread(() -> {
                         current_position.setText(tmp);
@@ -753,6 +754,10 @@ public class NavigationActivity extends AppCompatActivity {
             int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
             int node=0;
 
+            if(Integer.parseInt(dest_point)<100){
+                stair="t";
+            }
+
             if(stair.equals("4")){
                 node=(room-1);
             }else if(stair.equals("5")){
@@ -829,6 +834,70 @@ public class NavigationActivity extends AppCompatActivity {
 
     }
 
+    String changeToRoom(int node){
+        String floor="";
+        int flag=0;
+        String info = "";
+        if(node<50){//4th fllor
+            floor="4";
+        }else if(node<100){//5th floor
+            floor="5";
+            node-=50;
+        }
+
+        if(node<35){//room
+            node+=1;
+            if(node<10)
+                info="0"+node+"호";
+            else
+                info= node+"호";
+
+            if(node==10)
+                info="11호 & 계단";
+        }else if(node<50){//not room
+            flag=1;
+            if(node==35)
+                info="05호 앞 분기점";
+            else if(node==36)
+                info="우측 엘레베이터 복도1";
+            else if(node==37)
+                info="우측 엘레베이터 복도2";
+            else if(node==38)
+                info="우측 엘레베이터 복도3";
+            else if(node==39)
+                info="12호 앞 분기점";
+            else if(node==40)
+                info="중간 엘레베이터 복도1";
+            else if(node==41)
+                info="중간 엘레베이터 복도2";
+            else if(node==42)
+                info="중간 엘레베이터 복도3";
+            else if(node==43)
+                info="좌측 엘레베이터 공간";
+            else if(node==44)
+                info="좌측 계단";
+            else if(node==45)
+                info="중간 엘레베이터 앞";
+            else if(node==46)
+                info="01호 & 35호 사이 계단";
+            else if(node==47)
+                info="15호 & 16호 사이 계단";
+            else if(node==48)
+                info="우측 엘레베이터 앞";
+            else if(node==49)
+                info="08호 앞 계단";
+
+
+        }
+
+        if(flag==0){
+            return floor+info;
+        }else if(flag==1){
+            return floor+"층 "+info;
+        }
+
+        return node+"";
+    }
     private void playSound_next() {
         mediaPlayer = MediaPlayer.create(this, R.raw.sfx_next);
         mediaPlayer.start();

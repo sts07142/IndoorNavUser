@@ -291,6 +291,7 @@ public class MainActivity extends AppCompatActivity {
                     // 응답 데이터 처리
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
+                    location=changeToRoom(changeToNode(location));
                     String tmp = "현재 위치 : " + location;
                     runOnUiThread(() -> {
                         startLoc.setText(tmp);
@@ -325,4 +326,159 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    int changeToNode(String dest_point){
+        dest_point=dest_point.trim();
+        dest_point=dest_point.replaceAll("[층,/,호, ]","");
+        if(dest_point.equals("NOINFO") || dest_point.equals("")|| dest_point.equals(" ")){
+//            return changeToNode(start_point);
+            return 0;
+        }else{
+            String stair= String.valueOf(dest_point.charAt(0));
+            int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
+            int node=0;
+
+            if(Integer.parseInt(dest_point)<100){
+                stair="t";
+            }
+
+            if(stair.equals("4")){
+                node=(room-1);
+            }else if(stair.equals("5")){
+                node=(room-1);
+                node+=50;
+            }else if(stair.equals("t")){
+                if(room==1){
+                    node=40;
+                }else if(room==2){
+                    node=42;
+                }else if(room==3){
+                    node=41;
+                }else if(room==4){
+                    node=43;
+                }else if(room==5){
+                    node=35;
+                }else if(room==6){
+                    node=39;
+                }else if(room==7){
+                    node=36;
+                }else if(room==8){
+                    node=38;
+                }else if(room==9){
+                    node=37;
+                }else if(room==10){
+                    node=88;
+                }else if(room==11){
+                    node=86;
+                }else if(room==12){
+                    node=87;
+                }else if(room==13){
+                    node=89;
+                }else if(room==14){
+                    node=85;
+                }else if(room==15){
+                    node=92;
+                }else if(room==16){
+                    node=90;
+                }else if(room==17){
+                    node=91;
+                }else if(room==18){
+                    node=93;
+                }else if(room==19){
+                    node=44;
+                }else if(room==20){
+                    node=47;
+                }else if(room==21){
+                    node=45;
+                }else if(room==22){
+                    node=48;
+                }else if(room==23){
+                    node=46;
+                }else if(room==24){
+                    node=94;
+                }else if(room==25){
+                    node=97;
+                }else if(room==26){
+                    node=95;
+                }else if(room==27){
+                    node=98;
+                }else if(room==28){
+                    node=96;
+                }else if(room==29){
+                    //존재하지 않음
+                }else if(room==30){
+                    node=49;
+                }else if(room==31){
+                    node=99;
+                }
+            }
+
+            return node;
+        }
+
+    }
+
+    String changeToRoom(int node){
+        String floor="";
+        int flag=0;
+        String info = "";
+        if(node<50){//4th fllor
+            floor="4";
+        }else if(node<100){//5th floor
+            floor="5";
+            node-=50;
+        }
+
+        if(node<35){//room
+            node+=1;
+            if(node<10)
+                info="0"+node+"호";
+            else
+                info= node+"호";
+
+            if(node==10)
+                info="11호 & 계단";
+        }else if(node<50){//not room
+            flag=1;
+            if(node==35)
+                info="05호 앞 분기점";
+            else if(node==36)
+                info="우측 엘레베이터 복도1";
+            else if(node==37)
+                info="우측 엘레베이터 복도2";
+            else if(node==38)
+                info="우측 엘레베이터 복도3";
+            else if(node==39)
+                info="12호 앞 분기점";
+            else if(node==40)
+                info="중간 엘레베이터 복도1";
+            else if(node==41)
+                info="중간 엘레베이터 복도2";
+            else if(node==42)
+                info="중간 엘레베이터 복도3";
+            else if(node==43)
+                info="좌측 엘레베이터 공간";
+            else if(node==44)
+                info="좌측 계단";
+            else if(node==45)
+                info="중간 엘레베이터 앞";
+            else if(node==46)
+                info="01호 & 35호 사이 계단";
+            else if(node==47)
+                info="15호 & 16호 사이 계단";
+            else if(node==48)
+                info="우측 엘레베이터 앞";
+            else if(node==49)
+                info="08호 앞 계단";
+
+
+        }
+
+        if(flag==0){
+            return floor+info;
+        }else if(flag==1){
+            return floor+"층 "+info;
+        }
+
+        return node+"";
+    }
 }
