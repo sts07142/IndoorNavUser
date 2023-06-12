@@ -275,8 +275,8 @@ public class MainActivity extends AppCompatActivity {
                     // 응답 데이터 처리
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
+                    start = String.valueOf(changeToNode(location));
                     location=changeToRoom(changeToNode(location));
-                    start = location;
                     String tmp = "현재 위치 : " + location;
                     runOnUiThread(() -> {
                         startLoc.setText(tmp);
