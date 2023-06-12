@@ -751,7 +751,7 @@ public class NavigationActivity extends AppCompatActivity {
         dest_point=dest_point.replaceAll("[층,/,호, ]","");
         if(dest_point.equals("NOINFO") || dest_point.equals("")|| dest_point.equals(" ")){
 //            return changeToNode(start_point);
-            return 44;
+            return 0;
         }else{
             String stair= String.valueOf(dest_point.charAt(0));
             int room= Integer.parseInt(dest_point.substring(dest_point.length()-2,dest_point.length()));
