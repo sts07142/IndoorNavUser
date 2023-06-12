@@ -165,6 +165,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // API 연결 확인용 - 데이터 요청
+    /*
     public void fetchDataFromServer() {
         String serverUrl = "http://aeong.pythonanywhere.com";
         String endpoint = serverUrl + "/";
@@ -200,6 +201,8 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    *  */
+
     // scan wifi data in here!
     private void scanWifiData() throws JSONException {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -208,25 +211,6 @@ public class MainActivity extends AppCompatActivity {
         }
         JSONObject jsonData = new JSONObject();
         List<ScanResult> results = wifiManager.getScanResults();
-
-//        for (ScanResult result : results) {
-//            String ssid = result.SSID;
-//            String bssid = result.BSSID;
-//            int signalStrength = result.level;
-//
-//            // jsonData에 결과 추가
-//            try {
-//                JSONObject wifiData = new JSONObject();
-//                //wifiData.put("ssid", ssid);
-//                wifiData.put("bssid", bssid);
-//                wifiData.put("signalStrength", signalStrength);
-//                Log.d("wifi data", wifiData.toString());
-//                jsonData.put("wifi", wifiData);
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//        sendJsonData(jsonData);
 
         JSONArray wifiArray = new JSONArray();
         for (ScanResult result : results){
@@ -283,7 +267,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         jObject = new JSONObject(responseData);
                         location = jObject.getString("msg");
-                        start = location;
+
                     } catch (JSONException e) {
                         throw new RuntimeException(e);
                     }
@@ -292,13 +276,14 @@ public class MainActivity extends AppCompatActivity {
                     // 출발 위치 응답받아 넣기, 출발 위치 설정하기
                     // TextView의 텍스트 변경
                     location=changeToRoom(changeToNode(location));
+                    start = location;
                     String tmp = "현재 위치 : " + location;
                     runOnUiThread(() -> {
                         startLoc.setText(tmp);
 
                     });
                     // start = responseData;
-                    Log.d("API success ", responseData);
+                    Log.d("API success ", tmp + responseData);
                 } else {
                     // 응답이 실패한 경우 처리
                 }
