@@ -1,8 +1,10 @@
 package com.example.indoorlocalization;
 
 import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -59,10 +61,15 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Date;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 public class NavigationActivity extends AppCompatActivity {
+    private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
     private WifiManager wifiManager;
     private MediaPlayer mediaPlayer;
+    TextView test;
     /* component variables */
     TextView remained_distance; //남은 거리 표시
     TextView address_point; //출발지, 목적지
@@ -91,6 +98,7 @@ public class NavigationActivity extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle fromMain = intent.getExtras();
         /* find View */
+        test = findViewById(R.id.testview);
         remained_distance = findViewById(R.id.remained_distance);
         address_point = findViewById(R.id.navigation_textview_destination);
         current_position = findViewById(R.id.current_position);
@@ -138,7 +146,14 @@ public class NavigationActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    scanWifiData();
+                    while (true) {
+                        scanWifiData(); // 원하는 작업을 수행
+
+                        // 1초 동안 스레드를 일시 정지
+                        Thread.sleep(3000);
+                    }
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                 } catch (JSONException e) {
                     throw new RuntimeException(e);
                 }
@@ -168,6 +183,8 @@ public class NavigationActivity extends AppCompatActivity {
         }).start();
 
     }
+
+
     void bindPreview(ProcessCameraProvider cameraProvider) {
         Preview preview = new Preview.Builder()
                 .build();
@@ -205,7 +222,11 @@ public class NavigationActivity extends AppCompatActivity {
         }
         try{
             jsonData.put("wifi",wifiArray);
+            runOnUiThread(() -> {
+                test.setText(jsonData.toString());
+            });
             sendJsonData(jsonData);
+
         }catch(JSONException e){
             e.printStackTrace();
         }
@@ -259,7 +280,6 @@ public class NavigationActivity extends AppCompatActivity {
                     String tmp = "현재위치 : " + location;
                     runOnUiThread(() -> {
                         current_position.setText(tmp);
-
                     });
                     // start = responseData;
                     Log.d("API2 success ", responseData);
