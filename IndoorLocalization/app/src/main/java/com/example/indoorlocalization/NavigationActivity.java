@@ -1,10 +1,8 @@
 package com.example.indoorlocalization;
 
 import android.Manifest;
-import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -16,17 +14,13 @@ import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.RotateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.media.MediaPlayer;
 
 import androidx.camera.core.Camera;
 import androidx.camera.core.CameraSelector;
@@ -56,11 +50,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -141,14 +132,6 @@ public class NavigationActivity extends AppCompatActivity {
         //화살표 회전
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
         listener = new SensorListener();
-        try {
-            scanWifiData();
-        } catch (JSONException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
-        /* *
 
         new Thread(new Runnable() {
             @Override
@@ -164,8 +147,6 @@ public class NavigationActivity extends AppCompatActivity {
                 }
             }
         }).start();
-         */
-
 
         //내 위치 계산하기
         currentNode= Integer.parseInt(start_point);
@@ -252,8 +233,6 @@ public class NavigationActivity extends AppCompatActivity {
         // OkHttp 클라이언트 인스턴스 생성
         OkHttpClient client = new OkHttpClient();
 
-        //JSONObject msg = new JSONObject();
-
         // JSON 요청 본문 생성
         RequestBody requestBody = RequestBody.create(
                 MediaType.parse("application/json; charset=utf-8"),
@@ -292,7 +271,6 @@ public class NavigationActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         current_position.setText(tmp);
                     });
-                    // start = responseData;
                     Log.d("API2 success ", responseData);
                 } else {
                     // 응답이 실패한 경우 처리
@@ -438,9 +416,6 @@ public class NavigationActivity extends AppCompatActivity {
                 isPoint[i] = 1;
             }
         }
-
-
-
         isPoint[endNodeIndex]=1;
     }
 
@@ -465,8 +440,6 @@ public class NavigationActivity extends AppCompatActivity {
         int temp=0;
         while (temp<line.length) {
             String[] tokens = line[temp].split(",");
-
-            //Log.d("token", Arrays.toString(tokens));
             try {
                 linkBox[temp][0] = Double.parseDouble(tokens[0].trim());
             }catch (NumberFormatException e){
