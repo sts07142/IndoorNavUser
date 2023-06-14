@@ -66,7 +66,7 @@ import java.util.concurrent.ScheduledExecutorService;
 
 public class NavigationActivity extends AppCompatActivity {
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
+    int count = 0;
     private WifiManager wifiManager;
     private MediaPlayer mediaPlayer;
     TextView test;
@@ -141,24 +141,31 @@ public class NavigationActivity extends AppCompatActivity {
         //화살표 회전
         manager = (SensorManager)getSystemService(SENSOR_SERVICE); //각 객체설정
         listener = new SensorListener();
+        try {
+            scanWifiData();
+        } catch (JSONException e) {
+            throw new RuntimeException(e);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+        /* *
 
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    while (true) {
-                        scanWifiData(); // 원하는 작업을 수행
-
-                        // 1초 동안 스레드를 일시 정지
-                        Thread.sleep(3000);
+                while (true) {
+                    try {
+                        scanWifiData();  // 원하는 작업을 수행
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    } catch (JSONException e) {
+                        throw new RuntimeException(e);
                     }
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                } catch (JSONException e) {
-                    throw new RuntimeException(e);
                 }
             }
         }).start();
+         */
+
 
         //내 위치 계산하기
         currentNode= Integer.parseInt(start_point);
@@ -198,19 +205,21 @@ public class NavigationActivity extends AppCompatActivity {
     }
 
     // scan wifi data in here!
-    private void scanWifiData() throws JSONException {
+    private void scanWifiData() throws JSONException, InterruptedException {
+        count++;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // 권한이 거부되었을 경우 종료
             return;
         }
-        JSONObject jsonData = new JSONObject();
+        wifiManager.startScan();
         List<ScanResult> results = wifiManager.getScanResults();
 
+        JSONObject jsonData = new JSONObject();
         JSONArray wifiArray = new JSONArray();
+
         for (ScanResult result : results){
             String bssid = result.BSSID;
             int signalStrength = result.level;
-
             JSONObject wifi= new JSONObject();
             try{
                 wifi.put("BSSID",bssid);
@@ -223,13 +232,15 @@ public class NavigationActivity extends AppCompatActivity {
         try{
             jsonData.put("wifi",wifiArray);
             runOnUiThread(() -> {
-                test.setText(jsonData.toString());
+                // 실제 화면에서는 아래 줄 주석처리 하기
+                test.setText(count + "!!!!!" + jsonData.toString());
             });
             sendJsonData(jsonData);
 
         }catch(JSONException e){
             e.printStackTrace();
         }
+        Thread.sleep(1000);  // 1 ~ 3 초 사이의 랜덤한 시간 동안 스레드를 일시 정지
 
     }
     // JSON 데이터 전송 메서드 정의 -> 수집한 와이파이 정보 보내기
@@ -373,10 +384,12 @@ public class NavigationActivity extends AppCompatActivity {
             if(System.currentTimeMillis()-prevTime>=1000){
                 //내 위치 계산하기
                 Log.d("path","위치 갱신");
-                prevTime=System.currentTimeMillis();
+                prevTime = System.currentTimeMillis();
                 try {
                     scanWifiData();
                 } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                } catch (InterruptedException e) {
                     throw new RuntimeException(e);
                 }
             }
