@@ -425,7 +425,7 @@ public class MainActivity extends AppCompatActivity {
         }else if(node<50){//not room
             flag=1;
             if(node==35)
-                info="05호 앞 분기점";
+                info="우측 엘레베이터 복도5";
             else if(node==36)
                 info="우측 엘레베이터 복도1";
             else if(node==37)
@@ -433,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
             else if(node==38)
                 info="우측 엘레베이터 복도3";
             else if(node==39)
-                info="12호 앞 분기점";
+                info="우측 엘레베이터 복도4";
             else if(node==40)
                 info="중간 엘레베이터 복도1";
             else if(node==41)
@@ -447,9 +447,9 @@ public class MainActivity extends AppCompatActivity {
             else if(node==45)
                 info="중간 엘레베이터 앞";
             else if(node==46)
-                info="01호 & 35호 사이 계단";
+                info="중간 계단 위쪽";
             else if(node==47)
-                info="15호 & 16호 사이 계단";
+                info="중간 계단 아래쪽";
             else if(node==48)
                 info="우측 엘레베이터 앞";
             else if(node==49)
