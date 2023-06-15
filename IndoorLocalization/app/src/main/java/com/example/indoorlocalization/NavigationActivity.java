@@ -214,7 +214,7 @@ public class NavigationActivity extends AppCompatActivity {
             jsonData.put("wifi",wifiArray);
             runOnUiThread(() -> {
                 // 실제 화면에서는 아래 줄 주석처리 하기
-                test.setText(count + "!!!!!" + jsonData.toString());
+                //test.setText(count + "!!!!!" + jsonData.toString());
             });
             sendJsonData(jsonData);
 
